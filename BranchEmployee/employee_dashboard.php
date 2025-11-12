@@ -9,8 +9,8 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] != 'Branch Employee') {
   exit();
 }
 
-// fallback for employee name
-$employee_name = $_SESSION['employee_name'] ?? "Employee";
+// use username from session
+$employee_username = $_SESSION['username'];
 
 // get branch info
 $branch_name = "";
@@ -57,8 +57,8 @@ if (isset($_SESSION['branch_id'])) {
 
 <div class="main">
   <div class="topbar">
-    <div class="employee-name"> 
-      Welcome, <?= $_SESSION['employee_name'] ?>
+     <div class="employee-name"> 
+      Welcome, <?= htmlspecialchars($employee_username) ?>
     </div>
     <div class="profile-icon">
       <img src="profileIcon.png">
