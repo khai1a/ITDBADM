@@ -1,0 +1,93 @@
+<?php 
+$dbpath = "db_connect.php";
+$dbpath = realpath($dbpath);
+
+include($dbpath);
+
+?>
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Admin Panel</title>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link href="css/admin_sidebar.css" rel="stylesheet">
+    <link href="css/admin_general.css" rel="stylesheet">
+
+    <style>
+      .main {
+        align-items: center;
+      }
+
+      .card-header {
+        background-color: #842A3B;
+      }
+
+    </style>
+	</head>
+	<body>
+
+		<?php require'admin_sidebar.php'; ?>
+
+    <div class="container main">
+      <div class="container mt-5 mb-5">
+        <div class="card shadow-sm">
+          <div class="card-header text-white">
+            <h4 class="mb-0">Create New Staff Member</h4>
+          </div>
+          <div class="card-body">
+            <form>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="role">Role</label>
+                  <select id="role" name="role" class="form-control">
+                    <option selected disabled>Choose role...</option>
+                    <option value="Branch Manager">Branch Manager</option>
+                    <option value="Branch Employee">Branch Employee</option>
+                    <option value="Perfumer">Perfumer</option>
+                    <option value="Inter-Branch Manager">Inter-Branch Manager</option>
+                  </select>
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="branchID">Branch</label>
+                  <select id="branch" name="branch" class="form-control">
+                    <option selected disabled>Choose branch...</option>
+                    <option value="BR0001">BR0001</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="username">Username</label>
+                  <input type="text" class="form-control" id="username" name="username" placeholder="Enter username">
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="password">Password</label>
+                  <input type="password" class="form-control" id="password" name="password" placeholder="Enter password">
+                </div>
+              </div>
+                
+              <div class="form-row mb-3">
+                <label for="confirmpassword">Confirm Password</label>
+                <input type="password" class="form-control" id="confirmpassword" name="confirmpassword" placeholder="Confirm password">
+              </div>
+
+              <div class="d-flex justify-content-end">
+                <button type="reset" class="btn btn-secondary mr-2">Clear</button>
+                <button type="submit" class="btn btn-primary">Create Staff Account</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spacer">*</div>
+
+		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
+	</body>
+</html>

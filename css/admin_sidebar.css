@@ -1,0 +1,25 @@
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 15rem;
+    height: 100%;
+    background-color: #A3485A;
+    padding: 3rem 0px;
+    position: fixed;
+    z-index: 100;
+}
+
+.sidebar h3 {
+    text-align: center;
+    color:whitesmoke;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.sidebar a {
+    color: whitesmoke;
+}
+
+.nav-item {
+    margin-bottom: 0.7rem;
+}

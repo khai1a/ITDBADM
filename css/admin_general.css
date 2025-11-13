@@ -1,0 +1,65 @@
+ * {
+    font-family: 'Poppins',sans-serif;
+    margin: 0;
+    padding: 0;
+      }
+
+      body {
+        display: flex;
+        height: 100vh;
+        padding-bottom: 20px;
+        flex-direction: column;
+      }
+
+      .btn-primary {
+        color: whitesmoke !important;
+        background-color: #842A3B;
+        border: solid #842A3B;
+      }
+
+      .btn-primary:hover {
+        background-color: #A3485A;
+        border: solid #A3485A;
+        cursor: pointer;
+      }
+
+      .btn-secondary {
+        color: whitesmoke !important;
+        background-color: #A3485A;
+        border: solid #A3485A;
+      }
+
+      .btn-secondary:hover {
+        background-color: #842A3B;
+        border: solid #842A3B;
+        cursor:pointer;
+      }
+
+      .dashboard {
+        color: #662222;
+        align-content: center;
+        height: 100%;
+      }
+      
+      .page-title {
+        color: #842A3B;
+        font-weight: bold;
+      }
+
+      .card {
+        border: none;
+        border-radius: 1em;
+      }
+
+      .disabled {
+        background-color: gray !important;
+        border-color: gray !important;
+      }
+
+      .main {
+        padding-left: 15rem !important;
+      }
+
+      .spacer {
+        height: 20px;
+      }
