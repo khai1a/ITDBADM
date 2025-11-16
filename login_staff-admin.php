@@ -36,12 +36,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 case 'Branch Manager':
                     $message = "Welcome Branch Manager! Redirecting...";
                     $message_type = "success";
-                    echo "<meta http-equiv='refresh' content='2;url=branch_manager_dashboard.php'>";
+                    echo "<meta http-equiv='refresh' content='2;url=BranchManager/manager_dashboard.php'>";
                     break;
                 case 'Branch Employee':
                     $message = "Welcome Branch Employee! Redirecting...";
                     $message_type = "success";
-                    echo "<meta http-equiv='refresh' content='2;url=staff_dashboard.php'>";
+                    echo "<meta http-equiv='refresh' content='2;url=BranchEmployee/employee_dashboard.php'>";
                     break;
                 case 'Perfumer':
                     $message = "Welcome Perfumer! Redirecting...";
@@ -105,3 +105,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </div>
 </body>
 </html>
+
