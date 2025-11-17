@@ -1,9 +1,7 @@
 <?php 
-$dbpath = "db_connect.php";
-$dbpath = realpath($dbpath);
+$dbpath = dirname(__DIR__) . "/db_connect.php";
 
 include($dbpath);
-
 ?>
 
 <!DOCTYPE html>
@@ -12,8 +10,8 @@ include($dbpath);
     <title>Inter-Branch Manager - Branches</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link href="css/ibm_sidebar.css" rel="stylesheet">
-    <link href="css/ibm_general.css" rel="stylesheet">
+    <link href="../css/ibm_sidebar.css" rel="stylesheet">
+    <link href="../css/ibm_general.css" rel="stylesheet">
     <style>
       .card {
         box-shadow: 0px 5px 10px rgba(0,0,0,0.2);
