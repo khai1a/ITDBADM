@@ -9,21 +9,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $password = $_POST['password'];
 
+    // customer table
     $query_cust = "SELECT * FROM customers WHERE email='$email'";
     $result_cust = mysqli_query($conn, $query_cust);
 
     if (mysqli_num_rows($result_cust) > 0) {
         $customer = mysqli_fetch_assoc($result_cust);
+
         if ($password === $customer['password']) {
-            $_SESSION['user_id'] = $customer['customer_ID'];
+
+            $_SESSION['customer_ID'] = $customer['customer_ID'];
             $_SESSION['role'] = 'customer';
+
             $message = "Login successful! Redirecting...";
             $message_type = "success";
+
             echo "<meta http-equiv='refresh' content='2;url=customer_home.php'>";
+
         } else {
             $message = "Incorrect password.";
             $message_type = "danger";
         }
+
     } else {
         $message = "Customer not found.";
         $message_type = "danger";
@@ -37,6 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login - Aurum Scents</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="css/login_customer.css">
@@ -58,9 +66,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="form-group">
           <input type="email" name="email" placeholder="Email" required>
         </div>
+
         <div class="form-group">
           <input type="password" name="password" placeholder="Password" required>
         </div>
+
         <button type="submit" class="btn-submit">Sign In</button>
       </form>
     </div>
@@ -78,5 +88,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </div>
 </body>
 </html>
-
-
