@@ -1,0 +1,135 @@
+/* General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(120deg, #5a0f1a, #842A3B);
+    color: #fffaf3;
+    min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+    background-color: #eacb99 !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 50px;
+}
+
+.navbar .navbar-brand {
+    color: #5a0f1a !important;
+    font-weight: 700;
+    font-size: 1.7rem;
+}
+
+.navbar .nav-links-container {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    gap: 40px;
+}
+
+.navbar .nav-link {
+    color: #5a0f1a !important;
+    font-weight: 600;
+    text-align: center;
+}
+
+.navbar .nav-link:hover {
+    color: #a3485a !important;
+}
+
+.navbar .icons-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.navbar .fa-user, .navbar .fa-shopping-cart {
+    font-size: 1.3rem;
+    color: #5a0f1a;
+    cursor: pointer;
+}
+
+/* MAIN ABOUT SECTION */
+.about-section {
+    max-width: 1200px;
+    margin: 60px auto;
+    padding: 0 20px;
+    animation: fadeIn 0.9s ease-in-out;
+}
+
+/* Title */
+.about-title {
+    text-align: center;
+    font-size: 40px;
+    font-weight: 700;
+    color: #eacb99;
+    margin-bottom: 40px;
+}
+
+/* Content Blocks */
+.about-block {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    margin-bottom: 70px;
+}
+
+/* Reverse Layout for the 2nd block */
+.about-block.reverse {
+    flex-direction: row-reverse;
+}
+
+/* Text Styling */
+.about-text {
+    flex: 1;
+    font-size: 18px;
+    line-height: 1.8;
+    color: #fffaf3;
+}
+
+/* Images */
+.about-img {
+    flex: 1;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+.about-img img {
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+    display: block;
+}
+
+/* Buy Button */
+.btn-buy-here {
+    display: inline-block;
+    margin-top: 20px;
+    background-color: #a3485a;
+    color: #fff;
+    padding: 12px 30px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn-buy-here:hover {
+    background-color: #701c2a;
+}
+
+/* Fade Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
