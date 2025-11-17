@@ -1,0 +1,107 @@
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(120deg, #5a0f1a, #842A3B);
+  color: #333;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  background-color: #fffaf3;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  padding: 40px 60px;
+  max-width: 800px;
+  width: 90%;
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+h2 {
+  text-align: center;
+  color: #5a0f1a;
+  font-weight: 600;
+  margin-bottom: 30px;
+}
+
+.table {
+  background-color: #fff8ef;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.table th {
+  background-color: #fce8cb;
+  color: #5a0f1a;
+  width: 30%;
+  text-align: left;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.table td {
+  background-color: #fff;
+  color: #5a0f1a;
+  font-weight: 500;
+}
+
+.table th, .table td {
+  padding: 15px 20px;
+  border-color: #f0d7b5 !important;
+}
+
+/* Button container */
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+/* Edit button */
+.btn-primary, .btn-update {
+  background-color: #a3485a;
+  border: none;
+  border-radius: 30px;
+  padding: 12px 35px;
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover, .btn-update:hover {
+  background-color: #701c2a;
+}
+
+/* Back button */
+.btn-secondary, .btn-back {
+  background-color: #f5daa7;
+  border: none;
+  border-radius: 30px;
+  padding: 12px 35px;
+  color: #5a0f1a;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-secondary:hover, .btn-back:hover {
+  background-color: #eacb99;
+  color: #5a0f1a;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

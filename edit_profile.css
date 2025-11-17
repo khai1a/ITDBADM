@@ -1,0 +1,111 @@
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(120deg, #5a0f1a, #842A3B);
+  color: #333;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  width: 100%;
+  max-width: 800px;
+  padding: 0 20px;
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+.profile-card {
+    background-color: #fffaf3;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+    margin: 0 auto;
+}
+
+h2 {
+  text-align: center;
+  color: #5a0f1a;
+  font-weight: 600;
+  margin-bottom: 30px;
+}
+
+.profile-form .form-group {
+    margin-bottom: 18px;
+}
+
+.profile-form .form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border-radius: 10px;
+    border: 1px solid #d9b78e;
+    font-size: 15px;
+    background-color: rgba(255, 255, 255, 0.85);
+    transition: 0.3s ease;
+}
+
+.profile-form .form-control:focus {
+    outline: none;
+    border-color: #a3485a;
+    background-color: #fff;
+    color: #5a0f1a;
+    box-shadow: 0 0 8px rgba(163, 72, 90, 0.3);
+}
+
+.btn-update {
+    padding: 12px 30px;
+    background-color: #a3485a;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-weight: 600;
+    transition: 0.3s ease;
+}
+
+.btn-update:hover {
+    background-color: #701c2a;
+}
+
+.btn-back {
+    padding: 12px 30px;
+    background-color: #f5e3d5;
+    color: #5a0f1a;
+    border-radius: 30px;
+    border: 1px solid #d9b78e;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    transition: 0.3s ease;
+}
+
+.btn-back:hover {
+    background-color: #eacb99;
+    color: #5a0f1a;
+}
+
+input.is-invalid, select.is-invalid { 
+    border: 2px solid red; 
+}
+
+.invalid-feedback { 
+    display: block; 
+    color: red; 
+    font-size: 0.875rem; 
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.error-msg { color:#ffdddd; font-size:0.85rem; margin-top:2px; display:block; }
+input.invalid, select.invalid { border: 2px solid red; }
