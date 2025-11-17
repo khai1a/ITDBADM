@@ -81,16 +81,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             /* ---- Generate customer_ID ---- */
             $res = mysqli_query($conn, "SELECT customer_ID
-                                        FROM customers
-                                        ORDER BY CAST(SUBSTRING(customer_ID,5) AS UNSIGNED) DESC
-                                        LIMIT 1");
+                            FROM customers
+                            ORDER BY CAST(SUBSTRING(customer_ID,3) AS UNSIGNED) DESC
+                            LIMIT 1");
 
-            if ($row = mysqli_fetch_assoc($res)) {
-                $num = (int)substr($row['customer_ID'], 4) + 1;
-                $customer_ID = 'CUST' . str_pad($num, 2, '0', STR_PAD_LEFT);
-            } else {
-                $customer_ID = 'CUST01';
-            }
+                if ($row = mysqli_fetch_assoc($res)) {
+                    $num = (int)substr($row['customer_ID'], 2) + 1;  // get the number after 'CU'
+                    $customer_ID = 'CU' . str_pad($num, 4, '0', STR_PAD_LEFT); // pad to 4 digits
+                } else {
+                    $customer_ID = 'CU0001';
+                }
 
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
