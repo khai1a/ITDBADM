@@ -18,36 +18,34 @@ if ($row['country_ID'] != NULL) {
   $countryName = $resultCountry->fetch_assoc()['country_name'];
 }
 
-$conn->query("SET @perf = '$perfumeID'");
-$conn->query("CALL getAllSecondaryAccords(@perf)");
-$secondaryAccords = $conn->query("SELECT @perf")->fetch_assoc()['@perf'];
+$resultPrimaryAccord = $conn->query("SELECT * FROM perfume_accords pa
+                                    JOIN accords a ON a.accord_ID = pa.accord_ID
+                                    WHERE perfume_ID = '$perfumeID' AND is_primary = TRUE");
+$pAccordRow = $resultPrimaryAccord->fetch_assoc();
+$primaryAccordID = $pAccordRow['perfume_accord_id'];
+$primaryAccord = $pAccordRow['accord_name'];
 
-$conn->query("SET @perf = '$perfumeID'");
-$conn->query("CALL getPrimaryAccord(@perf)");
-$primaryAccord = $conn->query("SELECT @perf")->fetch_assoc()['@perf'];
+$resultSecondaryAccords = $conn->query("SELECT * FROM perfume_accords pa
+                                       JOIN accords a ON a.accord_ID = pa.accord_ID
+                                       WHERE pa.perfume_ID = '$perfumeID' AND pa.is_primary = 0");
 
-$conn->query("SET @perf = '$perfumeID'");
-$conn->query("CALL getAllSecondaryAccords(@perf)");
-$secondaryAccords = $conn->query("SELECT @perf")->fetch_assoc()['@perf'];
+$resultTopNotes = $conn->query("SELECT * FROM perfume_notes pn
+                                        JOIN notes n ON n.note_ID = pn.note_ID
+                                        WHERE pn.perfume_ID = '$perfumeID' AND pn.note_level = 'top'");
 
-$conn->query("SET @perf = '$perfumeID'");
-$conn->query("CALL getNotes(@perf, 'top')");
-$topNotes = $conn->query("SELECT @perf")->fetch_assoc()['@perf'];
+$resultMiddleNotes = $conn->query("SELECT * FROM perfume_notes pn
+                                        JOIN notes n ON n.note_ID = pn.note_ID
+                                        WHERE pn.perfume_ID = '$perfumeID' AND pn.note_level = 'middle'");
 
-$conn->query("SET @perf = '$perfumeID'");
-$conn->query("CALL getNotes(@perf, 'middle')");
-$middleNotes = $conn->query("SELECT @perf")->fetch_assoc()['@perf'];
-
-$conn->query("SET @perf = '$perfumeID'");
-$conn->query("CALL getNotes(@perf, 'base')");
-$baseNotes = $conn->query("SELECT @perf")->fetch_assoc()['@perf'];
+$resultBaseNotes = $conn->query("SELECT * FROM perfume_notes pn
+                                        JOIN notes n ON n.note_ID = pn.note_ID
+                                        WHERE pn.perfume_ID = '$perfumeID' AND pn.note_level = 'base'");
 
 $resultVolumes = $conn->query("SELECT * FROM perfume_volume
                     WHERE perfume_ID = '$perfumeID'
                     ORDER BY volume ASC");
                     
 $resultNotes = $conn->query("SELECT * FROM notes");
-
 $resultAccords = $conn->query("SELECT * FROM accords");
 
 ?>
@@ -173,19 +171,20 @@ $resultAccords = $conn->query("SELECT * FROM accords");
     </style>
   </head>
   <body>
+    
     <?php require 'admin_sidebar.php'; ?>
+    <?php if (isset($_GET['message'])) { ?>
+      <?= $_GET['message'] ?>
+    <?php } ?>
 
     <div class="container main mt-5 mb-5">
       <div class="row">
-        <!-- LEFT: MAIN PERFUME CARD -->
         <div class="col-md-4 mb-4">
           <div class="card perfume-card shadow-sm position-relative">
             <div class="card-icons">
-              <!-- Edit icon -->
               <a class="icon-btn" title="Edit" href="admin_editperfume.php?id=<?= $row['perfume_ID'] ?>">
                 <i class="fa-solid fa-pen-to-square"></i>
               </a>
-              <!-- Info icon (current page, could be disabled or link elsewhere) -->
               <a class="icon-btn" title="View Info" href="#">
                 <i class="fa-solid fa-circle-info"></i>
               </a>
@@ -229,7 +228,7 @@ $resultAccords = $conn->query("SELECT * FROM accords");
                   <form method="POST" action="update_primary_accord.php">
                     <small class="text-muted d-block mb-1">Main accord</small>
                     <div class="input-group input-group-sm mb-3">
-                     <select class="form-control">
+                     <select name="primaryAccord" id="primaryAccord" class="form-control">
                         <?php while ($rowAccord = $resultAccords->fetch_assoc()) { ?>
                           <option value="<?= $rowAccord['accord_ID'] ?>"
                             <?php if ($rowAccord['accord_name'] == $primaryAccord) { ?>
@@ -238,7 +237,8 @@ $resultAccords = $conn->query("SELECT * FROM accords");
                           </option>
                         <?php } ?>
                      </select>
-                      <input type="hidden" name="perfume_ID" value="<?= $perfumeID ?>">
+                     <input type="hidden" value="<?= $perfumeID ?>" name="perfume_id" >
+                     <input type="hidden" value="<?= $primaryAccordID ?>" name="perfume_accord_id_primary" id="perfume_accord_id_primary">
                       <div class="input-group-append">
                         <button class="btn btn-outline-secondary">Update</button>
                       </div>
@@ -247,29 +247,24 @@ $resultAccords = $conn->query("SELECT * FROM accords");
 
                   <!-- OTHER ACCORDS LIST -->
                   <small class="text-muted d-block mb-1">Secondary accords</small>
-                  <?php 
-                    $secArr = !empty($secondaryAccords)
-                              ? array_filter(array_map('trim', explode(',', $secondaryAccords)))
-                              : [];
-                  ?>
 
-                  <?php foreach ($secArr as $acc): ?>
+                  <?php while ($secAccords = $resultSecondaryAccords->fetch_assoc()) { ?>
                     <form method="POST" action="delete_secondary_accord.php" class="d-inline-block mb-1">
-                      <input type="hidden" name="perfume_ID" value="<?= $perfumeID ?>">
-                      <input type="hidden" name="accord_name" value="<?= htmlspecialchars($acc) ?>">
+                      <input type="hidden" name="secondary_perfume_accord_id" value="<?= $secAccords['perfume_accord_id'] ?>">
+                      <input type="hidden" value="<?= $perfumeID ?>" name="perfume_id" >
                       <span class="badge-pill-custom">
-                        <?= htmlspecialchars($acc) ?>
+                        <?= $secAccords['accord_name'] ?>
                         <button class="btn btn-sm btn-link text-danger p-0" title="Delete">
                           &times;
                         </button>
                       </span>
                     </form>
-                  <?php endforeach; ?>
+                  <?php } ?>
 
                   <!-- ADD NEW ACCORD -->
                   <form method="POST" action="add_secondary_accord.php" class="mt-3">
                     <div class="input-group input-group-sm">
-                     <select class="form-control">
+                     <select class="form-control" name="accord">
                       <option disabled selected>Choose an accord...</option>
                       <?php 
                         $resultAccords = $conn->query("SELECT * FROM accords");
@@ -307,6 +302,8 @@ $resultAccords = $conn->query("SELECT * FROM accords");
                           <?php while ($vol = $resultVolumes->fetch_assoc()): ?>
                             <tr>
                               <td>
+                                <input type="hidden" name="perfume_id" value="<?= $vol['perfume_ID'] ?>">
+                                <input type="hidden" value="<?= $vol['perfume_volume_ID'] ?>" name="pvID[]">
                                 <input type="number" name="volume_ml[]" class="form-control form-control-sm"
                                       value="<?= $vol['volume'] ?>" min="1">
                               </td>
@@ -315,13 +312,9 @@ $resultAccords = $conn->query("SELECT * FROM accords");
                                       value="<?= $vol['selling_price'] ?>">
                               </td>
                               <td>
-                                <form method="POST" action="delete_volume.php">
-                                  <input type="hidden" name="volume" value="<?= $vol['volume'] ?>">
-                                  <input type="hidden" name="perfume_ID" value="<?= $perfumeID ?>">
-                                  <button class="btn btn-sm btn-link text-danger">
+                                  <a class="btn btn-sm btn-link text-danger" href="delete_volume.php?id=<?= $vol['perfume_volume_ID'] ?>&pid=<?= $vol['perfume_ID'] ?>">
                                     <i class="fa-solid fa-trash"></i>
-                                  </button>
-                                </form>
+                                  </a>
                               </td>
                             </tr>
                           <?php endwhile; ?>
@@ -368,29 +361,27 @@ $resultAccords = $conn->query("SELECT * FROM accords");
                   <div class="col-md-4 notes-column mb-3">
                     <h6>Top Notes</h6>
 
-                    <?php $topArr = array_filter(array_map('trim', explode(',', $topNotes ?? ''))); ?>
-                    <?php foreach ($topArr as $note): ?>
+                    <?php while ($topNotes = $resultTopNotes->fetch_assoc()) { ?>
                       <form method="POST" action="delete_note.php" class="d-inline-block mb-1">
+                        <input type="hidden" name="perfume_note_id" value="<?= $topNotes['perfume_note_id'] ?>">
                         <input type="hidden" name="perfume_ID" value="<?= $perfumeID ?>">
-                        <input type="hidden" name="note_name" value="<?= htmlspecialchars($note) ?>">
-                        <input type="hidden" name="note_type" value="top">
                         <span class="badge-pill-custom">
-                          <?= htmlspecialchars($note) ?>
+                          <?= $topNotes['note_name'] ?>
                           <button class="btn btn-sm btn-link text-danger p-0">&times;</button>
                         </span>
                       </form>
-                    <?php endforeach; ?>
+                    <?php } ?>
 
                     <!-- Add note -->
                     <form method="POST" action="add_note.php">
                       <div class="input-group input-group-sm mt-2">
-                        <select name="topNote" id="topNote" class="form-control">
+                        <select name="note" id="topNote" class="form-control">
                           <option selected disabled>Select...</option>
                           <?php while ($rowNotes = $resultNotes->fetch_assoc()) { ?>
                             <option value="<?= $rowNotes['note_ID'] ?>"><?= $rowNotes['note_name'] ?></option>
                           <?php } ?>
                         </select>
-                        <input type="hidden" name="note_type" value="top">
+                        <input type="hidden" name="note_level" value="top">
                         <input type="hidden" name="perfume_ID" value="<?= $perfumeID ?>">
                         <div class="input-group-append">
                           <button class="btn btn-outline-secondary">Add</button>
@@ -403,29 +394,27 @@ $resultAccords = $conn->query("SELECT * FROM accords");
                   <div class="col-md-4 notes-column mb-3">
                     <h6>Middle Notes</h6>
 
-                    <?php $midArr = array_filter(array_map('trim', explode(',', $middleNotes ?? ''))); ?>
-                    <?php foreach ($midArr as $note): ?>
+                    <?php while($middleNotes = $resultMiddleNotes->fetch_assoc()) { ?>
                       <form method="POST" action="delete_note.php" class="d-inline-block mb-1">
+                        <input type="hidden" name="perfume_note_id" value="<?= $middleNotes['perfume_note_id'] ?>">
                         <input type="hidden" name="perfume_ID" value="<?= $perfumeID ?>">
-                        <input type="hidden" name="note_name" value="<?= htmlspecialchars($note) ?>">
-                        <input type="hidden" name="note_type" value="middle">
                         <span class="badge-pill-custom">
-                          <?= htmlspecialchars($note) ?>
+                          <?= $middleNotes['note_name'] ?>
                           <button class="btn btn-sm btn-link text-danger p-0">&times;</button>
                         </span>
                       </form>
-                    <?php endforeach; ?>
+                    <?php } ?>
 
                     <form method="POST" action="add_note.php">
                       <div class="input-group input-group-sm mt-2">
-                        <select name="middleNote" id="middleNote" class="form-control">
+                        <select name="note" id="middleNote" class="form-control">
                           <option selected disabled>Select...</option>
                           <?php $resultNotes = $conn->query("SELECT * FROM notes");
                             while ($rowNotes = $resultNotes->fetch_assoc()) { ?>
                             <option value="<?= $rowNotes['note_ID'] ?>"><?= $rowNotes['note_name'] ?></option>
                           <?php } ?>
                         </select>
-                        <input type="hidden" name="note_type" value="middle">
+                        <input type="hidden" name="note_level" value="middle">
                         <input type="hidden" name="perfume_ID" value="<?= $perfumeID ?>">
                         <div class="input-group-append">
                           <button class="btn btn-outline-secondary">Add</button>
@@ -438,29 +427,27 @@ $resultAccords = $conn->query("SELECT * FROM accords");
                   <div class="col-md-4 mb-3 notes-column">
                     <h6>Base Notes</h6>
 
-                    <?php $baseArr = array_filter(array_map('trim', explode(',', $baseNotes ?? ''))); ?>
-                    <?php foreach ($baseArr as $note): ?>
+                    <?php while($baseNotes = $resultBaseNotes->fetch_assoc()) { ?>
                       <form method="POST" action="delete_note.php" class="d-inline-block mb-1">
+                        <input type="hidden" name="perfume_note_id" value="<?= $baseNotes['perfume_note_id'] ?>">
                         <input type="hidden" name="perfume_ID" value="<?= $perfumeID ?>">
-                        <input type="hidden" name="note_name" value="<?= htmlspecialchars($note) ?>">
-                        <input type="hidden" name="note_type" value="base">
                         <span class="badge-pill-custom">
-                          <?= htmlspecialchars($note) ?>
+                          <?= $baseNotes['note_name'] ?>
                           <button class="btn btn-sm btn-link text-danger p-0">&times;</button>
                         </span>
                       </form>
-                    <?php endforeach; ?>
+                    <?php } ?>
 
                     <form method="POST" action="add_note.php">
                       <div class="input-group input-group-sm mt-2">
-                        <select name="baseNote" id="baseNote" class="form-control">
+                        <select name="note" id="baseNote" class="form-control">
                           <option selected disabled>Select...</option>
                           <?php $resultNotes = $conn->query("SELECT * FROM notes");
                             while ($rowNotes = $resultNotes->fetch_assoc()) { ?>
                             <option value="<?= $rowNotes['note_ID'] ?>"><?= $rowNotes['note_name'] ?></option>
                           <?php } ?>
                         </select>
-                        <input type="hidden" name="note_type" value="base">
+                        <input type="hidden" name="note_level" value="base">
                         <input type="hidden" name="perfume_ID" value="<?= $perfumeID ?>">
                         <div class="input-group-append">
                           <button class="btn btn-outline-secondary">Add</button>
