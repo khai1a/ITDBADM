@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // ✅ Correct password verification
         if (password_verify($password, $customer['password'])) {
-            $_SESSION['user_id'] = $customer['customer_ID'];
+            $_SESSION['customer_ID'] = $customer['customer_ID'];
             $_SESSION['role'] = 'customer';
             $message = "Login successful! Redirecting...";
             $message_type = "success";
@@ -79,3 +79,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </div>
 </body>
 </html>
+
