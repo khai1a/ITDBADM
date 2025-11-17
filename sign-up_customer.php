@@ -11,14 +11,23 @@ $country_result = mysqli_query($conn, "SELECT country_ID, country_name, currency
 // Pre-fill values if session exists
 $signup_data = $_SESSION['signup'] ?? [];
 
+// Email validation function
+function validate_strict_email($email) {
+    return preg_match('/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,10}$/', $email);
+}
+
+
 // Password validation function
 function validate_password($password) {
     return preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[\W_]).{8,}$/', $password);
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    /* -----------------------------------------------
+       STEP 1 — SAVE PERSONAL DATA IN SESSION
+    -------------------------------------------------*/
     if (isset($_POST['step']) && $_POST['step'] == 1) {
-        // Step 1: Save personal info to session
         $password = $_POST['password'];
         $confirm_password = $_POST['confirm_password'];
 
@@ -26,8 +35,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $message = "Passwords do not match!";
         } elseif (!validate_password($password)) {
             $message = "Password must be at least 8 characters, include uppercase, lowercase, number, and symbol.";
-        } elseif (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
-            $message = "Invalid email address!";
+        } elseif (!validate_strict_email($_POST['email'])) {
+        $message = "Invalid email format! Must contain a domain and a valid ending (e.g. .com, .ph, .net, .co.jp)";
         } else {
             $_SESSION['signup'] = [
                 'first_name' => mysqli_real_escape_string($conn, $_POST['first_name']),
@@ -44,7 +53,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
+    /* -----------------------------------------------
+       STEP 2 — INSERT CUSTOMER + ADDRESS
+    -------------------------------------------------*/
     if (isset($_POST['step']) && $_POST['step'] == 2) {
+
         $data = $_SESSION['signup'];
         $first_name = $data['first_name'];
         $last_name = $data['last_name'];
@@ -65,24 +78,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (mysqli_num_rows($check) > 0) {
             $message = "Email or mobile number already exists!";
         } else {
-            // Generate customer_ID
-            $res = mysqli_query($conn, "SELECT customer_ID FROM customers ORDER BY CAST(SUBSTRING(customer_ID,5) AS UNSIGNED) DESC LIMIT 1");
-            $customer_ID = ($row = mysqli_fetch_assoc($res)) ? 'CUST' . str_pad((int)substr($row['customer_ID'], 4) + 1, 2, '0', STR_PAD_LEFT) : 'CUST01';
+
+            /* ---- Generate customer_ID ---- */
+            $res = mysqli_query($conn, "SELECT customer_ID
+                                        FROM customers
+                                        ORDER BY CAST(SUBSTRING(customer_ID,5) AS UNSIGNED) DESC
+                                        LIMIT 1");
+
+            if ($row = mysqli_fetch_assoc($res)) {
+                $num = (int)substr($row['customer_ID'], 4) + 1;
+                $customer_ID = 'CUST' . str_pad($num, 2, '0', STR_PAD_LEFT);
+            } else {
+                $customer_ID = 'CUST01';
+            }
 
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-            // Insert into customers
+            /* ---- Insert into customers ---- */
             $insert_customer = "INSERT INTO customers 
                 (customer_ID, first_name, last_name, email, password, mobile_number, country_ID, birthday) 
                 VALUES 
                 ('$customer_ID','$first_name','$last_name','$email','$hashed_password','$mobile','$country_ID','$birthday')";
 
             if (mysqli_query($conn, $insert_customer)) {
-                // Insert address
+
+                /* ---- Generate address_ID (AD0001...) ---- */
+                $resAdd = mysqli_query($conn, "SELECT address_ID 
+                                               FROM customer_addresses 
+                                               ORDER BY CAST(SUBSTRING(address_ID,3) AS UNSIGNED) DESC 
+                                               LIMIT 1");
+
+                if ($rowAdd = mysqli_fetch_assoc($resAdd)) {
+                    $numA = (int)substr($rowAdd['address_ID'], 2) + 1;
+                    $address_ID = 'AD' . str_pad($numA, 4, '0', STR_PAD_LEFT);
+                } else {
+                    $address_ID = 'AD0001';
+                }
+
+                /* ---- Insert into customer_addresses ---- */
                 $insert_address = "INSERT INTO customer_addresses 
-                    (customer_ID,address_line1,address_line2,city,province,postal_code,country_ID) 
+                    (address_ID, customer_ID, address_line1, address_line2, city, province, postal_code, country_ID) 
                     VALUES 
-                    ('$customer_ID','$address_line1','$address_line2','$city','$province','$postal_code','$country_ID')";
+                    ('$address_ID', '$customer_ID', '$address_line1', '$address_line2', '$city', '$province', '$postal_code', '$country_ID')";
 
                 if (mysqli_query($conn, $insert_address)) {
                     $success = true;
@@ -100,6 +137,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 $step = $_GET['step'] ?? 1;
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
