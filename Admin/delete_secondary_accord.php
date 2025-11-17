@@ -24,4 +24,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
  header("Location: admin_viewperfumedetails.php?id=" . $perfumeID);
 exit();
 ?>
-
