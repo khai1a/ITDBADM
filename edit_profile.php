@@ -62,7 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($address_line1)) $errors[] = "Address Line 1 cannot be empty.";
     if (empty($city)) $errors[] = "City cannot be empty.";
     if (empty($postal_code)) $errors[] = "Postal code cannot be empty.";
-    if (empty($birthday)) $errors[] = "Birthday cannot be empty.";
     if (!in_array($country_ID, array_column($countries, 'country_ID'))) 
         $errors[] = "Invalid country selected.";
 
@@ -72,9 +71,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Only hash password if changed
         $hashed_password = !empty($password) ? password_hash($password, PASSWORD_DEFAULT) : $user['hashed_password'];
 
-        // Update customers
-        $stmt = $conn->prepare("UPDATE customers SET first_name=?, last_name=?, country_ID=?, password=?, mobile_number=?, birthday=? WHERE customer_ID=?");
-        $stmt->bind_param("sssssss", $first, $last, $country_ID, $hashed_password, $mobile, $birthday, $customer_ID);
+        // Update customers (exclude birthday since it's read-only)
+        $stmt = $conn->prepare("UPDATE customers SET first_name=?, last_name=?, country_ID=?, password=?, mobile_number=? WHERE customer_ID=?");
+        $stmt->bind_param("ssssss", $first, $last, $country_ID, $hashed_password, $mobile, $customer_ID);
         $stmt->execute();
         $stmt->close();
 
@@ -111,7 +110,7 @@ $conn->close();
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Edit Profile - Aurum Scents</title>
+<title>Edit Profile</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="css/edit_profile.css">
 </head>
@@ -178,7 +177,7 @@ $conn->close();
             </div>
 
             <div class="mb-3">
-                <input type="date" name="birthday" class="form-control" placeholder="Birthday *" value="<?= htmlspecialchars($user['birthday']) ?>">
+                <input type="date" name="birthday" class="form-control" placeholder="Birthday *" value="<?= htmlspecialchars($user['birthday']) ?>" readonly>
             </div>
 
             <div class="d-flex justify-content-between mt-4">
@@ -205,7 +204,7 @@ function checkChanges() {
         if(el.name) {
             if(el.name === 'password' && el.value.trim() !== '') {
                 changed = true;
-            } else if(el.value !== originalValues[el.name] && el.name !== 'password') {
+            } else if(el.value !== originalValues[el.name] && el.name !== 'password' && el.name !== 'birthday') {
                 changed = true;
             }
         }
@@ -224,4 +223,3 @@ checkChanges();
 </script>
 </body>
 </html>
-
