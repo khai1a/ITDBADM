@@ -18,9 +18,10 @@ $branch_id         = $_SESSION['branch_id'];
 // get branch info
 $branch_address = "";
 $currency_sign = ""; 
+$vat_percent = "";
 
 if ($branch_id) {
-  $query = "SELECT b.address, cur.currency_sign 
+  $query = "SELECT b.address, cur.currency_sign, c.vat_percent 
             FROM branches b
             JOIN countries c ON b.country_ID = c.country_ID
             JOIN currencies cur ON c.currency = cur.currency
@@ -31,13 +32,14 @@ if ($branch_id) {
       $branch = mysqli_fetch_assoc($result);
       $branch_address = $branch['address'];
       $currency_sign = $branch['currency_sign'];
+      $vat_percent = (float)$branch['vat_percent'];
+
   }
 }
 
 $order_id    = "";
 $order_date  = "";
 $order_total = "";
-$currency    = ""; 
 
 // order receipt
 $details = []; // for order_detail rows 
@@ -59,7 +61,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['orderID'])) {
         $order_id    = $order['order_ID'];
         $order_date  = date("F j, Y g:i A", strtotime($order['order_date']));
         $order_total = $order['order_total'];
-        $currency    = $order['currency'];
 
         // find order details
             $sqlDetails = 
@@ -76,7 +77,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['orderID'])) {
             JOIN perfume_volume pv ON od.perfume_volume_ID = pv.perfume_volume_ID
             JOIN perfumes p ON pv.perfume_ID = p.perfume_ID
             JOIN orders o ON od.order_ID = o.order_ID
-            LEFT JOIN customers c ON o.customer_ID = c.customer_ID
             LEFT JOIN returns r 
                 ON r.order_detail_ID = od.order_detail_ID
                 AND r.status IN ('Approved','Refunded')
@@ -201,11 +201,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['orderID'])) {
               <td><?= htmlspecialchars($currency_sign), number_format($d['unit_price'], 2) ?></td>
 
               <td>
-              <?php 
-                $qtyOrdered  = (int)$d['qty_ordered'];
-                $qtyReturned = (int)$d['qty_returned'];
-                $qtyRemaining = max(0, $qtyOrdered - $qtyReturned);
-                ?>
                 <select 
                 class="return-qty" 
                 name="return_qty[<?= htmlspecialchars($d['order_detail_ID']) ?>]" 
@@ -255,15 +250,16 @@ function toggleDropdown() {
 }
 
 // when cashier picks a return qty, compute refund_amount = qty * unit_price
-document.querySelectorAll('.return-qty').forEach(function(sel) {
-  sel.addEventListener('change', function() {
-    const unitPrice = parseFloat(sel.dataset.unitPrice || '0');
-    const qty = parseInt(sel.value || '0', 10);
-    const refundCell = sel.closest('tr').querySelector('.refund-amount');
-    const amount = (unitPrice * qty) || 0;
-    refundCell.textContent = amount.toFixed(2);
+const vatRate = <?= json_encode($vat_percent) ?>; 
+  document.querySelectorAll('.return-qty').forEach(function(sel) {
+    sel.addEventListener('change', function() {
+      const unitPrice = parseFloat(sel.dataset.unitPrice || '0');
+      const qty = parseInt(sel.value || '0', 10);
+      const refundCell = sel.closest('tr').querySelector('.refund-amount');
+      const amount = (unitPrice * qty * (1 + vatRate)) || 0;
+      refundCell.textContent = amount.toFixed(2);
+    });
   });
-});
 </script>
 
 </body>
