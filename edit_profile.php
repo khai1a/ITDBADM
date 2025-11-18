@@ -55,7 +55,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validation
     if (empty($first)) $errors[] = "First name cannot be empty.";
     if (empty($last)) $errors[] = "Last name cannot be empty.";
-    if (empty($password)) $errors[] = "Password cannot be empty.";
     if (!empty($password) && !preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$/', $password)) 
         $errors[] = "Password must be at least 8 chars, include uppercase, lowercase, digit, and symbol.";
     if (!empty($mobile) && !preg_match('/^\+\d{6,15}$/', $mobile)) 
@@ -70,8 +69,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Update if no errors
     if (empty($errors)) {
 
-        // Hash password
-        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        // Only hash password if changed
+        $hashed_password = !empty($password) ? password_hash($password, PASSWORD_DEFAULT) : $user['hashed_password'];
 
         // Update customers
         $stmt = $conn->prepare("UPDATE customers SET first_name=?, last_name=?, country_ID=?, password=?, mobile_number=?, birthday=? WHERE customer_ID=?");
@@ -131,11 +130,9 @@ $conn->close();
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <input type="text" name="first_name" class="form-control" placeholder="First Name *" value="<?= htmlspecialchars($user['first_name']) ?>">
-                    <span class="error-msg" id="first_name_error"></span>
                 </div>
                 <div class="col-md-6 mb-3">
                     <input type="text" name="last_name" class="form-control" placeholder="Last Name *" value="<?= htmlspecialchars($user['last_name']) ?>">
-                    <span class="error-msg" id="last_name_error"></span>
                 </div>
             </div>
 
@@ -145,12 +142,10 @@ $conn->close();
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <input type="password" name="password" class="form-control" placeholder="New Password *">
-                    <span class="error-msg" id="password_error"></span>
+                    <input type="password" name="password" class="form-control" placeholder="New Password">
                 </div>
                 <div class="col-md-6 mb-3">
                     <input type="text" name="mobile_number" class="form-control" placeholder="Mobile Number *" value="<?= htmlspecialchars($user['mobile_number']) ?>">
-                    <span class="error-msg" id="mobile_error"></span>
                 </div>
             </div>
 
@@ -161,12 +156,10 @@ $conn->close();
                         <option value="<?= $c['country_ID'] ?>" <?= $c['country_ID']==$user['country_ID']?'selected':'' ?>><?= $c['country_name'] ?></option>
                     <?php endforeach; ?>
                 </select>
-                <span class="error-msg" id="country_error"></span>
             </div>
 
             <div class="mb-3">
                 <input type="text" name="address_line1" class="form-control" placeholder="Address Line 1 *" value="<?= htmlspecialchars($user['address_line1']) ?>">
-                <span class="error-msg" id="address_line1_error"></span>
             </div>
             <div class="mb-3">
                 <input type="text" name="address_line2" class="form-control" placeholder="Address Line 2" value="<?= htmlspecialchars($user['address_line2']) ?>">
@@ -175,101 +168,59 @@ $conn->close();
             <div class="row">
                 <div class="col-md-4 mb-3">
                     <input type="text" name="city" class="form-control" placeholder="City *" value="<?= htmlspecialchars($user['city']) ?>">
-                    <span class="error-msg" id="city_error"></span>
                 </div>
                 <div class="col-md-4 mb-3">
                     <input type="text" name="province" class="form-control" placeholder="Province" value="<?= htmlspecialchars($user['province']) ?>">
                 </div>
                 <div class="col-md-4 mb-3">
                     <input type="text" name="postal_code" class="form-control" placeholder="Postal Code *" value="<?= htmlspecialchars($user['postal_code']) ?>">
-                    <span class="error-msg" id="postal_error"></span>
                 </div>
             </div>
 
             <div class="mb-3">
                 <input type="date" name="birthday" class="form-control" placeholder="Birthday *" value="<?= htmlspecialchars($user['birthday']) ?>">
-                <span class="error-msg" id="birthday_error"></span>
             </div>
 
             <div class="d-flex justify-content-between mt-4">
                 <a href="profile.php" class="btn btn-back">Back to Profile</a>
-                <button type="submit" class="btn btn-update" id="updateBtn">Update Profile</button>
+                <button type="submit" class="btn btn-update" disabled>Update Profile</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
+// Enable Update button only if there are changes
 const form = document.getElementById('editProfileForm');
-const fields = ['first_name','last_name','password','mobile_number','country_ID','address_line1','city','postal_code','birthday'];
-let touched = {};
+const updateBtn = form.querySelector('.btn-update');
 
-// Password validation with detailed messages
-function getErrorMessage(name, value) {
-    if(value.trim() === '') return 'This field cannot be empty';
-    if(name === 'password') {
-        if(value.length < 8) return 'Password must be at least 8 characters';
-        if(!/[A-Z]/.test(value)) return 'Password must include at least one uppercase letter';
-        if(!/[a-z]/.test(value)) return 'Password must include at least one lowercase letter';
-        if(!/\d/.test(value)) return 'Password must include at least one digit';
-        if(!/[\W_]/.test(value)) return 'Password must include at least one symbol';
-    }
-    if(name === 'mobile_number' && !/^\+\d{6,15}$/.test(value)) return 'Mobile must start with + and contain 6–15 digits';
-    if(['country_ID','first_name','last_name','address_line1','city','postal_code','birthday'].includes(name) && value.trim() === '') return 'This field cannot be empty';
-    return '';
-}
-
-function showError(el) {
-    const name = el.name;
-    if(!touched[name]) return;
-    const msg = getErrorMessage(name, el.value);
-    const span = document.getElementById(name+'_error');
-    if(msg) {
-        el.classList.add('invalid');
-        el.classList.remove('valid');
-        span.textContent = msg;
-        span.style.display = 'block';
-    } else {
-        el.classList.remove('invalid');
-        el.classList.add('valid');
-        span.textContent = '';
-        span.style.display = 'none';
-    }
-}
-
-function checkAllValid() {
-    let allValid = true;
-    fields.forEach(name => {
-        const el = form.querySelector(`[name="${name}"]`);
-        if(getErrorMessage(name, el.value)) allValid = false;
-    });
-    document.getElementById('updateBtn').disabled = !allValid;
-}
-
-// Attach event listeners
-fields.forEach(name => {
-    const el = form.querySelector(`[name="${name}"]`);
-    el.addEventListener('input', e => {
-        touched[name] = true;
-
-        // Auto prepend + for mobile
-        if(name === 'mobile_number' && e.target.value) {
-            if(!e.target.value.startsWith('+')) {
-                e.target.value = '+' + e.target.value.replace(/^\+*/,'');
-            }
-        }
-
-        showError(el);
-        checkAllValid();
-    });
-    el.addEventListener('blur', e => {
-        touched[name] = true;
-        showError(el);
-        checkAllValid();
-    });
+const originalValues = {};
+Array.from(form.elements).forEach(el => {
+    if(el.name) originalValues[el.name] = el.value;
 });
 
-checkAllValid();
+function checkChanges() {
+    let changed = false;
+    Array.from(form.elements).forEach(el => {
+        if(el.name) {
+            if(el.name === 'password' && el.value.trim() !== '') {
+                changed = true;
+            } else if(el.value !== originalValues[el.name] && el.name !== 'password') {
+                changed = true;
+            }
+        }
+    });
+    updateBtn.disabled = !changed;
+}
+
+Array.from(form.elements).forEach(el => {
+    if(el.name) {
+        el.addEventListener('input', checkChanges);
+        el.addEventListener('change', checkChanges);
+    }
+});
+
+checkChanges();
 </script>
 </body>
 </html>
