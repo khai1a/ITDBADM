@@ -1,0 +1,74 @@
+.return-form {
+    background: #fff;
+    padding: 25px;
+    margin-top: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  
+  .return-form label {
+    display: block;
+    margin: 10px 0 5px;
+  }
+  
+  .return-form input,
+  .return-form select,
+  .return-form textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+  
+  .return-form button {
+    background-color: #a3495a;
+    color: #fff;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  
+  .return-form button:hover {
+    background-color: #842A3B;
+  }
+  
+  .returns-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  .returns-table th, .returns-table td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+  }
+  
+  .returns-table th {
+    background-color: #f4f4f4;
+    color: #662422;
+  }
+  
+  .customer-card {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  
+  .customer-card h4 { 
+    margin-bottom: 10px; 
+    color: #662422; 
+}
+  .customer-info { 
+    margin-top: 10px; 
+    font-size: 14px; 
+    color: #444; 
+}
+  .customer-info strong { 
+    color: #a3495a; 
+}
+  
