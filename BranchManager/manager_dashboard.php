@@ -1,5 +1,7 @@
 <?php
-include('db_connect.php');
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+include('../db_connect.php');
 session_start();
 
 // block access if not logged in as a branch manager
