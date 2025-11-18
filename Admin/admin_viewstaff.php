@@ -2,8 +2,6 @@
 $dbpath = dirname(__DIR__) . "/db_connect.php";
 include($dbpath);
 
-$message = $_GET['message'];
-
 $resultBranches = $conn->query("SELECT branch_ID, address FROM branches ORDER BY branch_ID");
 
 $branches = [];
