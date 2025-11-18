@@ -117,7 +117,19 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
               VALUE ('$perfumeAccordID', '$perfumeID', '$secondaryAccord', false)";
     $conn->query($query);
 
-    $message = "Successfully added perfume!";
+    $target_dir = "../images/";
+    $target_file = $target_dir . basename($_FILES["image"]["name"]);
+    $uploadOk = 1;
+    $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
+    if(isset($_POST["submit"])) {
+      if (move_uploaded_file($_FILES["image"]["tmp_name"], $target_file)) {
+        $message = "The file ". htmlspecialchars( basename( $_FILES["image"]["name"])). " has been uploaded.";
+      } else {
+        $message = "Sorry, there was an error uploading your file.";
+      }
+    }
+
+    $message .= "Successfully added perfume!";
 
     $conn->query("COMMIT;");
 
@@ -154,8 +166,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 	</head>
 	<body>
 
-		<?php require'admin_sidebar.php'; ?>
-
+  <?php require'admin_sidebar.php' ?>
+  
     <div class="container main mt-5 mb-5">
 
       <?php if (isset($message)) { ?>
@@ -313,12 +325,12 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
             <div class="form-group">
               <label for="image">Image File</label>
-              <input type="file" class="form-control" id="image" name="image" placeholder="e.g., gentle_fluidity_gold.jpg" accept="image/png, image/jpeg, image/webp" required>
+              <input type="file" class="form-control" id="image" name="image" placeholder="e.g., gentle_fluidity_gold.jpg" accept="image/png, image/jpeg, image/webp image/avif" required>
             </div>
 
             <div class="d-flex justify-content-end">
               <button type="reset" class="btn btn-secondary mr-2">Clear</button>
-              <button type="submit" class="btn btn-primary">Add Perfume</button>
+              <button type="submit" class="btn btn-primary" name="submit" value="Upload Image">Add Perfume</button>
             </div>
           </form>
         </div>
