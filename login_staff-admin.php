@@ -17,10 +17,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (mysqli_num_rows($result_staff) > 0) {
         $staff = mysqli_fetch_assoc($result_staff);
 
+        // changed nov 18
+        /* Compare plain text password
         if ($password === $staff['password']) {
             $_SESSION['user_id'] = $staff['staff_ID'];
             $_SESSION['role'] = $staff['role'];
+            $_SESSION['branch_id'] = $staff['branch_ID']; */ 
+        if (hash('sha256', $password) === $staff['password']) {
+            $_SESSION['user_id'] = $staff['staff_ID'];
+            $_SESSION['role'] = $staff['role'];
             $_SESSION['branch_id'] = $staff['branch_ID'];
+            $_SESSION['username'] = $staff['username'];
 
             switch ($staff['role']) {
                 case 'Admin':
@@ -105,4 +112,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </div>
 </body>
 </html>
+
 
