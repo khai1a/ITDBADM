@@ -1,3 +1,6 @@
+h2 {
+  color: #662422;
+}
 
 .inventory-table {
   width: 100%;
@@ -75,7 +78,7 @@
 }
 
 .save-btn {
-  background-color: #a3495a;
+  background-color: #a3495a; 
   color: white;
   font-weight: 600;
   padding: 10px 20px;
@@ -97,3 +100,4 @@
   transform: translateY(0);
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
+
