@@ -13,8 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	$conn->query("START TRANSACTION");
 	try {
 		$res = $conn->query("UPDATE perfume_accords 
-												 SET accord_ID = '$newAccordID' 
-												 WHERE perfume_accord_id = '$primaryPerfumeAccordID'");
+							SET accord_ID = '$newAccordID' 
+							WHERE perfume_accord_id = '$primaryPerfumeAccordID'");
 		$conn->query("COMMIT");
 		$message = "Successfully updated main accord!";
 	} catch (Exception $e) {
@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	}
 }
 
- header("Location: admin_viewperfumedetails.php?id=" . $perfumeID);
+ header("Location: admin_viewperfumedetails.php?id=" . $perfumeID . "&message=" . $message);
 exit();
 
 ?>

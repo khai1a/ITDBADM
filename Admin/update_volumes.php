@@ -7,7 +7,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
   $perfumeID = $_POST['perfume_id'];
   $perfumeVolumeIDs = $_POST['pvID'];
-  $volumes = $_POST['volume_ml'];
   $sellingPrices = $_POST['price'];
 
   $count = count($perfumeVolumeIDs);
@@ -17,19 +16,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   try {
     for ($i = 0; $i < $count; $i++) {
       $conn->query("UPDATE perfume_volume 
-                  SET volume = $volumes[$i], 
                   selling_price = $sellingPrices[$i]
                   WHERE perfume_volume_ID = '$perfumeVolumeIDs[$i]'");
     }
     $conn->query("COMMIT");
+    $message = "Successfully updated selling price(s).";
   } catch (Exception $e) {
     $conn->query("ROLLBACK");
-    $message = "Error updating volumes: " . $e->getMessage();
+    $message = "Error updating prices: " . $e->getMessage();
   }
 
 
 } 
-  header("Location: admin_viewperfumedetails.php?id=" . $perfumeID);
+  header("Location: admin_viewperfumedetails.php?id=" . $perfumeID . "&message=" . $message);
 exit();
 
 ?>

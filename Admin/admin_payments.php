@@ -5,16 +5,18 @@ include($dbpath);
 
 if (isset($_GET['filter'])) {
   $filter = $_GET['filter'];
-  $resultOrders = $conn->query("SELECT order_id, order_status, order_date, last_update 
-                              FROM orders 
-                              WHERE order_type = 'Online'
-                                AND order_status = '$filter'");
+  $resultPayments = $conn->query("SELECT * FROM payments p
+                                          JOIN orders o ON o.order_ID = p.order_ID 
+                                          AND status = '$filter'");
 } else {
-  $resultOrders = $conn->query("SELECT order_id, order_status, order_date, last_update 
-                              FROM orders 
-                              WHERE order_type = 'Online'
-                                AND order_status != 'Completed'");
+  $resultPayments = $conn->query("SELECT * FROM payments p
+                                          JOIN orders o ON o.order_ID = p.order_ID");
 }
+  $totalReceived = $conn->query("SELECT SUM(p.amount / c.fromUSD) AS total FROM payments p
+                                        JOIN orders o ON o.order_ID = p.order_ID
+                                        JOIN currencies c ON c.currency = o.currency
+                                        WHERE p.status = 'Received'")->fetch_assoc()['total'];
+
 ?>
 
 <!DOCTYPE html>
@@ -23,8 +25,8 @@ if (isset($_GET['filter'])) {
     <title>Inter-Branch Manager - Orders</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <link href="../css/ibm_sidebar.css" rel="stylesheet">
-    <link href="../css/ibm_general.css" rel="stylesheet">
+    <link href="../css/admin_sidebar.css" rel="stylesheet">
+    <link href="../css/admin_general.css" rel="stylesheet">
     <style>
 
       .header .card-title {
@@ -62,7 +64,7 @@ if (isset($_GET['filter'])) {
   </head>
   <body>
 
-    <?php require 'ibm_sidebar.php'; ?>
+    <?php require 'admin_sidebar.php'; ?>
 
     <div class="container flex-column main p-5">
       <div class="d-flex flex-row justify-content-between mb-4">
@@ -75,10 +77,9 @@ if (isset($_GET['filter'])) {
             Select Status Filter
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="ibm_orders.php?filter=Preparing">Preparing</a></li>
-            <li><a class="dropdown-item" href="ibm_orders.php?filter=Ready">Ready</a></li>
-            <li><a class="dropdown-item" href="ibm_orders.php?filter=Shipping">Shipping</a></li>
-            <li><a class="dropdown-item" href="ibm_orders.php?filter=Cancelled">Cancelled</a></li>
+            <li><a class="dropdown-item" href="admin_payments.php?filter=Received">Received</a></li>
+            <li><a class="dropdown-item" href="admin_payments.php?filter=Processing">Processing</a></li>
+            <li><a class="dropdown-item" href="admin_payments.php?filter=Refunded">Refunded</a></li>
           </ul>
         </div>
       </div>
@@ -92,9 +93,7 @@ if (isset($_GET['filter'])) {
       <div class="bottom-bar p-3">
         <div class="d-flex flex-row justiy-content-around">
           <form method="POST" action="ship_all_ready_orders.php">
-            <button class="btn btn-primary">
-              Ship out ready orders
-            </button>
+            <p>Total Received: $<?= number_format($totalReceived, 2) ?></p>
           </form>
         </div>
       </div>
@@ -105,12 +104,12 @@ if (isset($_GET['filter'])) {
             <div class="row">
               <div class="col">
                 <h5 class="card-title">
-                  Order ID
+                  Payment ID
                 </h5>
               </div>
               <div class="col">
                 <h5 class="card-title">
-                  Date Placed
+                  Amount
                 </h5>
               </div>
               <div class="col">
@@ -120,51 +119,65 @@ if (isset($_GET['filter'])) {
               </div>
               <div class="col">
                 <h5 class="card-title">
-                  Last Update
+                  Method
                 </h5>
               </div>
               <div class="col">
-
+                <h5 class="card-title">
+                  Customer ID
+                </h5>
+              </div>
+              <div class="col">
+                <h5 class="card-title">
+                  Order ID
+                </h5>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <?php while ($row = $resultOrders->fetch_assoc()) { ?>
+      <?php while ($row = $resultPayments->fetch_assoc()) { ?>
       <div class="card item">
         <div class="card-body">
           <div class="container text-left">
             <div class="row">
               <div class="col">
                 <p class="card-text">
-                  <?= $row['order_id'] ?>
+                  <?= $row['payment_ID'] ?>
                 </p>
               </div>
               <div class="col">
                 <p class="card-text">
-                  <?= $row['order_date'] ?>
+                  <?php
+                      $amt = $row['amount'];
+                      $curr = $row['currency'];
+                      $conn->query("SET @out = 0");
+                      $conn->query("CALL convert_to_usd($amt,'$curr', @out)");
+                      $res = $conn->query("SELECT @out")->fetch_assoc()['@out'];
+                      echo "$" . number_format($res, 2);
+                  ?>
                 </p>
               </div>
               <div class="col">
                 <p class="card-text">
-                  <?= $row['order_status'] ?>
+                  <?= $row['status'] ?>
                 </p>
               </div>
               <div class="col">
                 <p class="card-text">
-                  <?= $row['last_update'] ?>
+                  <?= $row['method'] ?>
                 </p>
               </div>
               <div class="col">
-                <form method="POST" action="ship_out_order.php">
-                  <input type="hidden" value="<?= $row['order_id'] ?>" name="order_id">
-                  <button class="btn btn-primary 
-                    <?php if ($row['order_status'] != 'Ready') { echo 'disabled'; } ?>"
-                    <?php if ($row['order_status'] != 'Ready') { echo 'disabled'; } ?>>
-                    Ship out
-                  </button>
-                </form>
+                <p class="card-text">
+                  <?= $row['customer_ID'] ?>
+                </p>
+              </div>
+              <div class="col">
+                <p class="card-text">
+                  <?= $row['order_ID'] ?>
+                </p>
               </div>
             </div>
           </div>

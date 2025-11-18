@@ -14,10 +14,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   try {
     $conn->query("INSERT INTO perfume_accords (perfume_accord_id, accord_id, perfume_ID, is_primary) VALUE
                   ('$perfumeAccordID', '$accordID', '$perfumeID', 0)");
+    $message = "Successfully added accord.";
   } catch (Exception $e) {
     $message = "Error adding accord: " . $e->getMessage();
   }
 }
 
- header("Location: admin_viewperfumedetails.php?id=" . $perfumeID);
+ header("Location: admin_viewperfumedetails.php?id=" . $perfumeID . "&message=" . $message);
 exit();

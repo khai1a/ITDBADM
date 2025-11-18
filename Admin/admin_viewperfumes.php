@@ -6,7 +6,6 @@ include($dbpath);
 $resultPerfumes = $conn->query("SELECT p.perfume_ID, p.perfume_name, p.concentration, p.Gender, b.brand_name, p.image_name
                                       FROM perfumes p
                                       JOIN brands b ON b.brand_ID = p.brand_ID
-                                      JOIN perfume_volume pv ON pv.perfume_ID = p.perfume_ID
                                       ORDER BY perfume_name ASC");
 ?>
 

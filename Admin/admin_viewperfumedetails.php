@@ -171,13 +171,16 @@ $resultAccords = $conn->query("SELECT * FROM accords");
     </style>
   </head>
   <body>
-    
-    <?php require 'admin_sidebar.php'; ?>
-    <?php if (isset($_GET['message'])) { ?>
-      <?= $_GET['message'] ?>
-    <?php } ?>
 
-    <div class="container main mt-5 mb-5">
+    <?php require 'admin_sidebar.php'; ?>
+    <div class="container main p-5">
+
+        <?php if (isset($_GET['message'])) { ?>
+          <div class="alert alert-info">
+            <?= $_GET['message'] ?>
+          </div>
+        <?php } ?>
+
       <div class="row">
         <div class="col-md-4 mb-4">
           <div class="card perfume-card shadow-sm position-relative">
@@ -304,8 +307,7 @@ $resultAccords = $conn->query("SELECT * FROM accords");
                               <td>
                                 <input type="hidden" name="perfume_id" value="<?= $vol['perfume_ID'] ?>">
                                 <input type="hidden" value="<?= $vol['perfume_volume_ID'] ?>" name="pvID[]">
-                                <input type="number" name="volume_ml[]" class="form-control form-control-sm"
-                                      value="<?= $vol['volume'] ?>" min="1">
+                                <?= $vol['volume'] ?> ml
                               </td>
                               <td>
                                 <input type="text" name="price[]" class="form-control form-control-sm"

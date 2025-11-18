@@ -10,12 +10,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
   if (isset($_GET['id'])){
     try {
         $res = $conn->query("DELETE FROM perfume_volume WHERE perfume_volume_id = '$perfumeVolumeID'");
+        $message = "Successfully deleted volume.";
     } catch (Exception $e) {
         $message = "Error deleting volume: " . $e->getMessage();
     }
   }
 }
 
- header("Location: admin_viewperfumedetails.php?id=" . $perfumeID);
+ header("Location: admin_viewperfumedetails.php?id=" . $perfumeID . "&message=" . $message);
 exit();
 ?>

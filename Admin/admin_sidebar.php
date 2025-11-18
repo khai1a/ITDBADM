@@ -5,18 +5,13 @@
         </h3>
         <ul class="nav flex-column">
           <li class="nav-item">
-            <a class="nav-link" href="#">
-              Home
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              Staff Members
-            </a>
-          </li>
-          <li class="nav-item">
             <a class="nav-link" href="admin_viewperfumes.php">
               Perfumes
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="admin_viewstaff.php">
+              Staff Members
             </a>
           </li>
           <li class="nav-item">

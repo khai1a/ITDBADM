@@ -2,7 +2,54 @@
 $dbpath = dirname(__DIR__) . "/db_connect.php";
 
 include($dbpath);
+
+$query = "SELECT branch_ID, currency FROM branches b
+          JOIN countries c ON b.country_ID = c.country_ID";
+$resultBranches =$conn->query($query);
+
+$query = "SELECT COUNT(order_detail_ID) AS count
+          FROM order_details od
+          LEFT JOIN order_supply_assignment osa ON od.order_detail_ID = osa.order_detail_ID
+          WHERE order_supply_assignment_ID = NULL";
+$resultOrderDetails = $conn->query("SELECT count(*) AS unassigned_orders
+          FROM order_details od
+          LEFT JOIN order_supply_assignment osa ON od.order_detail_ID = osa.order_detail_ID
+          JOIN orders o ON od.order_ID = o.order_ID
+          WHERE o.order_type = 'Online' AND osa.order_supply_assignment_ID IS NULL;");
+$numUnassignedOrders = $resultOrderDetails->fetch_assoc()['unassigned_orders'];
+
+$resultLowSKUs = $conn->query("SELECT 
+                                COUNT(*) AS total_low_skus, 
+                                COUNT(DISTINCT branch_ID) AS affected_branches
+                                FROM inventory
+                                WHERE quantity < 30;")->fetch_assoc();
+
+function getTotalCompletedOrdersToday($branchID, $conn) {
+  $conn->query("SET @out = 0");
+  $conn->query("CALL getTotalCompletedOrdersToday('$branchID', @out)");
+  $ordersToday = $conn->query("SELECT @out")->fetch_assoc()['@out'];
+
+  return $ordersToday;
+}
+
+function getBranchRevenue($branchID, $conn) {
+  $conn->query("SET @out = 0");
+  $conn->query("CALL getBranchMonthlyRevenue('$branchID', @out)");
+  $ordersToday = $conn->query("SELECT @out")->fetch_assoc()['@out'];
+
+  return $ordersToday;
+}
+
+function getOrderCount($status, $conn) {
+  $conn->query("SET @out = 0");
+  $conn->query("CALL count_orders_by_status('$status', 'Online', @out)");
+  $ordersToday = $conn->query("SELECT @out")->fetch_assoc()['@out'];
+
+  return $ordersToday;
+}
+
 ?>
+
 
 <!DOCTYPE html>
 <html>
@@ -48,7 +95,7 @@ include($dbpath);
                 Order Supply Requests
                 </h5>
                 <p class="card-text">
-                  6 pending orders
+                  <?= number_format($numUnassignedOrders, 0) ?> pending orders
                 </p>
                 <a class="btn btn-primary" href="ibm_orders_pending.php">
                   View Pending Orders
@@ -64,9 +111,10 @@ include($dbpath);
                   Low Stock Inventory
                 </h5>
                 <p class="card-text">
-                  10 SKUs low on stock across 3 branches
+                  <?= number_format($resultLowSKUs['total_low_skus']) ?> SKUs low on stock across 
+                  <?= number_format($resultLowSKUs['affected_branches']) ?> branches
                 </p>
-                <a class="btn btn-primary" href="#">
+                <a class="btn btn-primary" href="ibm_branches.php">
                   View Inventories
                 </a>
               </div>
@@ -92,66 +140,35 @@ include($dbpath);
                     </div>
                     <div class="col">
                       <h6 class="card-text summary-header">
-                        Total Sales Today
+                        Orders Completed Today
                       </h6>
                     </div>
                     <div class="col">
                       <h6 class="card-text summary-header">
-                        Monthly Revenue
+                        Revenue This Month
                       </h6>
                     </div>
                   </div>
 
+                  <?php while ($rowBranch = $resultBranches->fetch_assoc()) { ?>
                   <div class="row">
                     <div class="col">
                       <div class="card-text">
-                        BR0001
+                        <?= $rowBranch['branch_ID'] ?>
                       </div>
                     </div>
                     <div class="col">
                       <div class="card-text">
-                        12
+                        <?= number_format(getTotalCompletedOrdersToday($rowBranch['branch_ID'], $conn),0)?>
                       </div>
                     </div>
                     <div class="col">
-                      $23,287.10
+                      $ <?= number_format(getBranchRevenue($rowBranch['branch_ID'], $conn), 2) ?>
                     </div>
                   </div>
-
-                  <div class="row">
-                    <div class="col">
-                      <div class="card-text">
-                        BR0002
-                      </div>
-                    </div>
-                    <div class="col">
-                      <div class="card-text">
-                        3
-                      </div>
-                    </div>
-                    <div class="col">
-                      $7,341.0
-                    </div>
-                  </div>
-
-                  <div class="row">
-                    <div class="col">
-                      <div class="card-text">
-                        BR0003
-                      </div>
-                    </div>
-                    <div class="col">
-                      <div class="card-text">
-                        25
-                      </div>
-                    </div>
-                    <div class="col">
-                      $63,205.82
-                    </div>
-                  </div>
+                  <?php } ?>
                 </div>
                 <!-- INNER GRID -->
-
                 <a class="btn btn-primary" href="ibm_branches.php">
                   View All Branches
                 </a>
@@ -181,7 +198,7 @@ include($dbpath);
                     </div>
                   </div>
 
-                  <div class="row">
+                   <div class="row">
                     <div class="col">
                       <div class="card-text">
                         Placed
@@ -189,7 +206,7 @@ include($dbpath);
                     </div>
                     <div class="col">
                       <div class="card-text">
-                        21
+                        <?= getOrderCount('Placed', $conn) ?>
                       </div>
                     </div>
                   </div>
@@ -202,7 +219,7 @@ include($dbpath);
                     </div>
                     <div class="col">
                       <div class="card-text">
-                        13
+                        <?= getOrderCount('Preparing', $conn) ?>
                       </div>
                     </div>
                   </div>
@@ -215,7 +232,7 @@ include($dbpath);
                     </div>
                     <div class="col">
                       <div class="card-text">
-                        4
+                        <?= getOrderCount('Ready', $conn) ?>
                       </div>
                     </div>
                   </div>
@@ -228,7 +245,7 @@ include($dbpath);
                     </div>
                     <div class="col">
                       <div class="card-text">
-                        32
+                        <?= getOrderCount('Shipping', $conn) ?>
                       </div>
                     </div>
                   </div>

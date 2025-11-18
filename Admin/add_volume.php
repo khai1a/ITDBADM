@@ -14,12 +14,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   try {
     $conn->query("INSERT INTO perfume_volume (perfume_volume_ID, perfume_ID, volume, selling_price) 
                   VALUES ('$perfumeVolumeID','$perfumeID', $newVolume, '$sellingPrice')");
+    $message = "Successfully added volume.";
   } catch (Exception $e) {
     $message = "Error adding new volume: " . $e->getMessage();
   }
 }
 
- header("Location: admin_viewperfumedetails.php?id=" . $perfumeID);
+ header("Location: admin_viewperfumedetails.php?id=" . $perfumeID . "&message=" . $message);
 exit();
 
 ?>

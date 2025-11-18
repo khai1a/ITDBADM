@@ -2,6 +2,40 @@
 $dbpath = dirname(__DIR__) . "/db_connect.php";
 
 include($dbpath);
+
+ $resultBranches = $conn->query("SELECT branch_ID FROM branches");
+
+if (isset($_GET['bid'])){
+  $selectedBranchID =  $_GET['bid'];
+  $selectedBranchRow = $conn->query("SELECT * FROM branches b
+                                            JOIN countries co ON co.country_ID = b.country_ID 
+                                            WHERE branch_ID = '$selectedBranchID'")->fetch_assoc();
+  $conn->query("SET @count = 0");
+  $conn->query("CALL getTotalCompletedOrdersToday('$selectedBranchID', @count)");
+  $completedOrders = $conn->query("SELECT @count")->fetch_assoc()['@count'];
+
+  $conn->query("SET @`text` = '';");
+  $conn->query("CALL getTop3Fragrances('$selectedBranchID', @`text`);");
+  $top3 = $conn->query("SELECT @`text`;")->fetch_assoc()['@`text`'];
+  
+  $resultInventory = $conn->query("SELECT 
+                                    i.inventory_ID, 
+                                    CONCAT(p.perfume_name,' ', pv.volume, 'ml') AS perfume, 
+                                    i.quantity, 
+                                    i.last_update, 
+                                    (i.quantity < 30) AS is_low 
+                                  FROM inventory i
+                                  JOIN perfume_volume pv ON pv.perfume_volume_ID = i.perfume_volume_ID
+                                  JOIN perfumes p ON p.perfume_ID = pv.perfume_ID
+                                  WHERE branch_ID = '$selectedBranchID'");
+
+  $conn->query("SET @usd = 0");
+  $conn->query("CALL getBranchMonthlyRevenue('$selectedBranchID', @usd)");
+  $monthRevenue = $conn->query("SELECT @usd")->fetch_assoc()['@usd'];
+  if ($monthRevenue == null) {
+    $monthRevenue = 0;
+  };
+}
 ?>
 
 <!DOCTYPE html>
@@ -12,11 +46,11 @@ include($dbpath);
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link href="../css/ibm_sidebar.css" rel="stylesheet">
     <link href="../css/ibm_general.css" rel="stylesheet">
+    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
     <style>
       .card {
         box-shadow: 0px 5px 10px rgba(0,0,0,0.2);
       }
-
     </style>
   </head>
   <body>
@@ -35,89 +69,75 @@ include($dbpath);
           </a>
 
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">BR0001</a></li>
-            <li><a class="dropdown-item" href="#">BR0002</a></li>
-            <li><a class="dropdown-item" href="#">BR0003</a></li>
+            <?php while ($rowBranch = $resultBranches->fetch_assoc()) { ?>
+            <li><a class="dropdown-item" href="ibm_branches.php?bid=<?= $rowBranch['branch_ID'] ?>"><?= $rowBranch['branch_ID'] ?></a></li>
+            <?php } ?>
           </ul>
         </div>
       </div>
-          <div class="card">
-            <div class="card-header">
-              <h4 >
-                Branch BR0001
-              </h4>
+
+      <?php if (isset($_GET['bid'])) { ?>
+      <div class="card">
+        <div class="card-header">
+          <h4 >
+            Branch <?= $selectedBranchRow['branch_ID'] ?>
+          </h4>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">
+            <p class="card-text">
+              Country: <?= $selectedBranchRow['country_name'] ?>
+            </p>
+            <p class="card-text">
+              Location: <?= $selectedBranchRow['address'] ?>
+            </p>
+          </li>
+          <li class="list-group-item">
+            <p class="card-text">
+              Completed Orders Today: <?= $completedOrders ?><!-- Walk ins -->
+            </p>
+            <p class="card-text">
+              Revenue This Month: $<?= number_format($monthRevenue, 2) ?>
+            </p>
+            <p class="card-text">
+              Top selling: <?= $top3 ?> <!-- Walk ins -->
+            </p>
+          </li>
+          <li class="list-group-item">
+            <h5 class="card-text">
+              Branch Inventory
+            </h5>
+            <div class="container mt-3 ">
+              <table class="table">
+                <thead>
+                  <th scope="col">SKU</th>
+                  <th scope="col">Perfume</th>
+                  <th scope="col">Quantity</th>
+                  <th scope="col">Last Update</th>
+                  <th scope="col"></th>
+                </thead>
+                <tbody>
+                  <?php while ($rowInventory = $resultInventory->fetch_assoc()) { ?>
+                  <tr>
+                    <td><?= $rowInventory['inventory_ID'] ?></td>
+                    <td><?= $rowInventory['perfume'] ?></td>
+                    <td><?= $rowInventory['quantity'] ?></td>
+                    <td><?= $rowInventory['last_update'] ?></td>
+                    <td>
+                      <?php if ($rowInventory['is_low'] == 1) { ?>
+                       Low stock!
+                      <?php } ?>
+                    </td>
+                  </tr>
+                  <?php } ?>
+                </tbody>
+              </table>
             </div>
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item">
-                <p class="card-text">
-                  Country: Japan
-                </p>
-                <p class="card-text">
-                  Location: Ginza District, Chuo City, Tokyo 104-0061
-                </p>
-              </li>
-              <li class="list-group-item">
-                <p class="card-text">
-                  Total Sales Today: 16 <!-- Walk ins -->
-                </p>
-                <p class="card-text">
-                  Revenue This Month: $12,972.00
-                </p>
-                <p class="card-text">
-                  Top selling: Baccarat Rouge 540 <!-- Walk ins -->
-                </p>
-                <p class="card-text">
-                  Active Order Assignments: 5 <!-- Order assignments that are associated with orders that have not been completed yet -->
-                </p>
-              </li>
-              <li class="list-group-item">
-                <h5 class="card-text">
-                  Branch Inventory
-                </h5>
-                <div class="container mt-3 ">
-                  <table class="table">
-                    <thead>
-                      <th scope="col">SKU</th>
-                      <th scope="col">Perfume</th>
-                      <th scope="col">Quantity</th>
-                      <th scope="col">Last Update</th>
-                      <th scope="col"></th>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>IN91242</td>
-                        <td>Black Phantom 100ML</td>
-                        <td>3</td>
-                        <td>11-11-2025 6:16:00 PM</td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <td>INW82U5</td>
-                        <td>Fleur Narcotique 100ML</td>
-                        <td>2</td>
-                        <td>11-11-2025 6:18:00 PM</td>
-                        <td>!</td>
-                      </tr>
-                      <tr>
-                        <td>IN91242</td>
-                        <td>Black Phantom 100ML</td>
-                        <td>3</td>
-                        <td>11-11-2025 6:16:00 PM</td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <td>INW82U5</td>
-                        <td>Fleur Narcotique 100ML</td>
-                        <td>2</td>
-                        <td>11-11-2025 6:18:00 PM</td>
-                        <td>!</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </li>
-            </ul>
-          </div>
+          </li>
+        </ul>
+      </div>
+
+      <?php } ?>
     </div>
 
     <div class="spacer">*</div>
@@ -125,5 +145,6 @@ include($dbpath);
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
+    
   </body>
 </html>

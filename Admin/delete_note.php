@@ -9,11 +9,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
   try {
     $res = $conn->query("DELETE FROM perfume_notes WHERE perfume_note_id = '$perfumeNoteID'");
+    $message = "Successfully deleted note.";
   } catch (Exception $e) {
     $message = "Error deleting note: " . $e->getMessage();
   }
 }
 
- header("Location: admin_viewperfumedetails.php?id=" . $perfumeID);
+ header("Location: admin_viewperfumedetails.php?id=" . $perfumeID . "&message=".$message);
 exit();
 ?>
