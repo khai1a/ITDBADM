@@ -21,7 +21,7 @@ $branch_address = "";
 if ($branch_id) {
   $query = "SELECT address FROM branches WHERE branch_ID = ?";
   if ($stmt = $conn->prepare($query)) {
-      $stmt->bind_param("s", $branch_id); // string
+      $stmt->bind_param("s", $branch_id); 
       $stmt->execute();
       $result_branch = $stmt->get_result();
       if ($result_branch && $result_branch->num_rows > 0) {
@@ -41,20 +41,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['inventory_id'], $_POS
   $id  = $_POST['inventory_id'];
   $qty = (int)$_POST['quantity'];
 
-  $update = "UPDATE inventory SET quantity = ? WHERE inventory_ID = ?";
-  if ($stmt = $conn->prepare($update)) {
-      $stmt->bind_param("is", $qty, $id);
-      if ($stmt->execute()) {
-          $update_message = "Quantity updated successfully.";
-      } else {
-          $update_message = "Failed to update quantity: " . $stmt->error;
-      }
+  try {
+      // start transaction
+      $conn->begin_transaction();
+
+      // lock row to prevent concurrent checkout updates
+      $stmt = $conn->prepare("SELECT quantity FROM inventory WHERE inventory_ID=? FOR UPDATE");
+      $stmt->bind_param("s", $id);
+      $stmt->execute();
       $stmt->close();
-  } else {
-      $update_message = "Failed to prepare update query: " . $conn->error;
+
+      if ($qty < 0) {
+          throw new Exception("Invalid quantity");
+      }
+
+      $update = "UPDATE inventory SET quantity = ? WHERE inventory_ID = ?";
+      $stmt = $conn->prepare($update);
+      $stmt->bind_param("is", $qty, $id);
+      $stmt->execute();
+      $stmt->close();
+
+      $conn->commit();
+      $update_message = "Quantity updated successfully.";
+  } catch (Exception $e) {
+      $conn->rollback();
+      $update_message = "Failed to update quantity: " . $e->getMessage();
   }
 }
-
 
 // build inventory query with filter
 $sql = "SELECT i.inventory_ID, p.perfume_name, pv.volume, i.quantity
@@ -90,6 +103,7 @@ if ($stmt = $conn->prepare($sql)) {
   <title>Inventory | Aurum Scents</title>
   <link rel="stylesheet" href="employee_inventory.css">
   <link rel="stylesheet" href="employee_dashboard.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 <body>
 
 <div class="sidebar">
@@ -116,7 +130,7 @@ if ($stmt = $conn->prepare($sql)) {
         <p><strong>Username:</strong> <?= htmlspecialchars($employee_username) ?></p>
         <p><strong>Role:</strong> <?= htmlspecialchars($employee_role) ?></p>
         <p><strong>Branch:</strong> <?= htmlspecialchars($branch_address) ?></p>
-        <a href="../logout.php" class="logout-btn">Logout</a>
+        <a href="logout.php" class="logout-btn">Logout</a>
       </div>
     </div>
   </div>
@@ -201,5 +215,6 @@ function toggleDropdown() {
 </script>
 </body>
 </html>
+
 
 
