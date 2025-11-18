@@ -107,5 +107,6 @@ input.is-invalid, select.is-invalid {
   }
 }
 
-.error-msg { color:#ffdddd; font-size:0.85rem; margin-top:2px; display:block; }
+.error-msg { color:#5a0f1a; font-size:0.85rem; margin-top:2px; display:block; }
+
 input.invalid, select.invalid { border: 2px solid red; }
