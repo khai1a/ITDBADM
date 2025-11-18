@@ -1,33 +1,119 @@
 <?php
-
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 session_start();
 include('../db_connect.php');
 
 // block access if not logged in as an employee
 if (!isset($_SESSION['role']) || $_SESSION['role'] != 'Branch Employee') {
-  header("Location: login_staff-admin.php");
+  header("Location: ../login_staff-admin.php");
   exit();
 }
 
 // use username from session
 $employee_username = $_SESSION['username'];
+$employee_role = $_SESSION['role'];
+$employee_id = $_SESSION['user_id'];
+$branch_id = $_SESSION['branch_id'];
 
 // get branch info
-$branch_name = "";
 $branch_address = "";
+$currency_sign = ""; 
 
-if (isset($_SESSION['branch_id'])) {
-  $branch_id = mysqli_real_escape_string($conn, $_SESSION['branch_id']);
-  $query = "SELECT b.address 
-            FROM branches b 
+if ($branch_id) {
+  $query = "SELECT b.address, cur.currency_sign 
+            FROM branches b
+            JOIN countries c ON b.country_ID = c.country_ID
+            JOIN currencies cur ON c.currency = cur.currency
             WHERE b.branch_ID = '$branch_id'";
   $result = mysqli_query($conn, $query);
 
   if ($result && mysqli_num_rows($result) > 0) {
       $branch = mysqli_fetch_assoc($result);
       $branch_address = $branch['address'];
+      $currency_sign = $branch['currency_sign'];
   }
 }
+
+// get monthly top 10 sellers
+
+$stmt = $conn->prepare("CALL getMonthlyTopSellersPerBranch(?, ?)");
+$limit = 10;
+$stmt->bind_param("si", $branch_id, $limit);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$labels = [];
+$data = [];
+while ($row = $result->fetch_assoc()) {
+    $labels[] = $row['perfume_name'];
+    $data[]   = $row['total_qty'];
+}
+
+$stmt->free_result();
+$conn->next_result(); 
+$stmt->close();
+
+// count all inventory for this branch
+$sqlSku = "SELECT COUNT(*) AS sku_count
+           FROM inventory
+           WHERE branch_ID = '$branch_id'";
+$resSku = mysqli_query($conn, $sqlSku);
+$skuRow = mysqli_fetch_assoc($resSku);
+
+// count inventory items with low stock (low stock threshold is <30)
+$sqlLow = "SELECT COUNT(*) AS low_stock_count
+           FROM inventory
+           WHERE branch_ID = '$branch_id'
+             AND quantity < 30
+             AND quantity > 0";
+$resLow = mysqli_query($conn, $sqlLow);
+$lowRow = mysqli_fetch_assoc($resLow);
+
+$skuCount = $skuRow['sku_count'];
+$lowStock = $lowRow['low_stock_count'];
+
+// orders today: total amount and total num
+$sqlOrders = "SELECT COUNT(*) AS order_count,
+                     SUM(order_total) AS total_sales
+              FROM orders
+              WHERE branch_ID = ?
+                AND order_type = 'Walk-in'
+                AND DATE(order_date) = CURDATE()";
+
+$stmt = $conn->prepare($sqlOrders);
+$stmt->bind_param("s", $branch_id);
+$stmt->execute();
+$resOrders = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+// returns pending
+$sqlReturns = "
+    SELECT COUNT(*) AS pending_returns
+    FROM returns r
+    JOIN order_details od ON r.order_detail_ID = od.order_detail_ID
+    JOIN orders o ON od.order_ID = o.order_ID
+    WHERE o.branch_ID = ?
+      AND r.status = 'Requested'
+";
+$stmt = $conn->prepare($sqlReturns);
+$stmt->bind_param("s", $branch_id);
+$stmt->execute();
+$resReturns = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+
+// ongoing promo
+$sqlPromo = "SELECT discount_code, discount_percent
+             FROM discounts
+             WHERE (customer_ID IS NULL OR customer_ID = ?)
+               AND CURDATE() BETWEEN date_created AND valid_until";
+
+$stmt = $conn->prepare($sqlPromo);
+$stmt->bind_param("s", $employee_id);
+$stmt->execute();
+$resPromo = $stmt->get_result()->fetch_assoc();
+$stmt->close();
 
 ?>
 
@@ -49,7 +135,7 @@ if (isset($_SESSION['branch_id'])) {
   <div class="sidebar-bottom">
     <a href="employee_dashboard.php">Dashboard</a>
     <a href="employee_inventory.php">Inventory</a>
-    <a href="employee_orders.php">Walk-In Orders</a>
+    <a href="employee_orders.php">Create Order</a>
     <a href="employee_returns.php">Returns</a>
     <a href="employee_view_orders.php">View Orders</a>
   </div>
@@ -57,54 +143,109 @@ if (isset($_SESSION['branch_id'])) {
 
 <div class="main">
   <div class="topbar">
-     <div class="employee-name"> 
-      Welcome, <?= htmlspecialchars($employee_username) ?>
-    </div>
-    <div class="profile-icon">
-      <img src="profileIcon.png">
-    </div>
+  <div class="employee-name"> 
+  Welcome, <?= htmlspecialchars($employee_username) ?>
+</div>
+
+<div class="profile-container">
+  <div class="profile-icon" onclick="toggleDropdown()">
+    <img src="profileIcon.png" alt="Profile">
   </div>
-  <div class="branch-info">
-  Branch: <?= htmlspecialchars($branch_address) ?>
-  </div>  
+  <div id="profile-dropdown" class="dropdown">
+    <p><strong>Username:</strong> <?= htmlspecialchars($_SESSION['username']) ?></p>
+    <p><strong>Role:</strong> <?= htmlspecialchars($_SESSION['role']) ?></p>
+    <p><strong>Branch:</strong> <?= htmlspecialchars($branch_address) ?></p>
+    <a href="logout.php" class="logout-btn">Logout</a>
+  </div>
+</div>
+  </div> 
 
   <div class="widgets">
     <div class="card">
-      <h3>Inventory Status</h3>
-      <p>42 SKUs in stock</p>
-      <p>4 low-stock items</p>
-      <button onclick="window.location.href='employee_inventory.php'">View Inventory</button>
-
-    </div>
-    <div class="card">
-      <h3>Walk-In Orders</h3>
-      <p>9 orders today</p>
-      <p>₱13,250 total</p>
-      <button onclick="window.location.href='employee_orders.php'">Create New Order</button>
-    </div>
-
-    <div class="card">
-      <h3>Returns</h3>
-      <p>2 pending requests</p>
-      <button>Manage Returns</button>
-    </div>
-
-    <div class="card">
-      <h3>Payments</h3>
-      <p>View and manage walk-in payments</p>
-      <button onclick="window.location.href='employee_payments.php'">Manage Payments</button>
-    </div>
-</div>
-
-<div class="sales-summary">
-    <h2> Sales Summary (Walk-In)</h2>
-    <p><strong>Daily Total:</strong> ₱<?= number_format($sales['total_sales'] ?? 0, 2) ?></p>
-    <p><strong>Orders Today:</strong> <?= $sales['order_count'] ?? 0 ?></p>
-    <p><strong>Top Seller:</strong> <?= $top['perfume_name'] ?? 'N/A' ?></p>
+    <h3>Inventory Status</h3>
+    <p><?= $skuCount ?> SKUs in stock</p>
+    <p><?= $lowStock ?> low-stock items</p>
   </div>
 
+
+  <div class="card">
+    <h3>Walk-In Orders</h3>
+    <p><?= $resOrders['order_count'] ?> orders today</p>
+    <p><?= htmlspecialchars($currency_sign), number_format($resOrders['total_sales'], 2) ?> total</p>
+  </div>
+
+  <div class="card">
+    <h3>Returns</h3>
+    <p><?= $resReturns['pending_returns'] ?> pending requests</p>
+  </div>
+
+  <div class="card">
+    <h3>Ongoing Promo</h3>
+    <?php if ($resPromo): ?>
+      <p>Code: <?= htmlspecialchars($resPromo['discount_code']) ?></p>
+      <p><?= $resPromo['discount_percent'] * 100 ?>% off</p>
+    <?php else: ?>
+      <p>No active promotions</p>
+    <?php endif; ?>
+  </div>
 </div>
 
+
+<div class="sales-chart">
+  <div class="sales-chart-inner">
+    <h2>Monthly Top Sellers</h2>
+    <canvas id="topSellersChart"></canvas>
+  </div>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+function toggleDropdown() {
+  const dropdown = document.getElementById("profile-dropdown");
+  dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+}
+
+//bar chart
+const labels = <?= json_encode($labels) ?>;
+const data = {
+  labels: labels,
+  datasets: [
+    {
+      label: 'Units Sold',
+      data: <?= json_encode($data) ?>,
+      borderColor: 'rgba(219, 172, 52, 1)',       // gold accent
+      backgroundColor: 'rgba(219, 172, 52, 0.6)', // softer fill
+      borderWidth: 2,
+      borderRadius: 8,   // rounded bars
+      borderSkipped: false,
+    }
+  ]
+};
+
+const config = {
+  type: 'bar',
+  data: data,
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' },
+      title: {
+        display: true,
+        font: { size: 18, weight: 'bold' },
+        color: '#6b4e16'
+      }
+    },
+    scales: {
+      y: { beginAtZero: true }
+    }
+  }
+};
+
+new Chart(document.getElementById('topSellersChart'), config);
+</script>
 
 
 </body>
