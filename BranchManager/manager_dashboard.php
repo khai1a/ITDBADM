@@ -1,7 +1,6 @@
 <?php
-
+include('db_connect.php');
 session_start();
-include('../db_connect.php');
 
 // block access if not logged in as a branch manager
 if (!isset($_SESSION['role']) || $_SESSION['role'] != 'Branch Manager') {
@@ -52,7 +51,7 @@ if ($branch_id) {
     <a href="manager_orders.php">Walk-In Orders</a>
     <a href="manager_returns.php">Returns</a>
     <a href="manager_view_orders.php">View Orders</a>
-    <a href="manager_generate_sales_report.php">Generate Sales Report</a> <!-- change to file name -->
+    <a href="sales_management.php">Generate Sales Report</a> <!-- change to file name -->
   </div>
 </div>
 
