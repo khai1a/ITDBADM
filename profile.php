@@ -54,7 +54,7 @@ $full_address .= ' ' . $user['postal_code'];
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>User Profile</title>
+    <title>My Profile - Aurum Scents</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/profile.css">
 </head>
@@ -82,3 +82,4 @@ $full_address .= ' ' . $user['postal_code'];
 </div>
 </body>
 </html>
+
