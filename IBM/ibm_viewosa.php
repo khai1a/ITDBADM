@@ -6,17 +6,22 @@ $dbpath = dirname(__DIR__) . "/db_connect.php";
 
 include($dbpath);
 
-if (isset($_GET['filter'])) {
-  $filter = $_GET['filter'];
-  $resultOrders = $conn->query("SELECT order_id, order_status, order_date, last_update 
-                              FROM orders 
-                              WHERE order_type = 'Online'
-                                AND order_status = '$filter'");
-} else {
-  $resultOrders = $conn->query("SELECT order_id, order_status, order_date, last_update 
-                              FROM orders 
-                              WHERE order_type = 'Online'
-                                AND order_status != 'Completed'");
+if (isset($_GET['id'])) {
+  $order_ID = $_GET['id'];
+  $resultOSA = $conn->query("SELECT 
+                                        osa.order_supply_assignment_ID AS id,
+                                        CONCAT(p.perfume_name, ' ', pv.volume, 'ml') AS item,
+                                        osa.inventory_ID AS sku,
+                                        osa.quantity,
+                                        b.branch_ID AS branch
+                            FROM order_supply_assignment osa
+                            JOIN order_details od ON od.order_detail_ID = osa.order_detail_ID
+                            JOIN orders o ON o.order_ID = od.order_ID
+                            JOIN perfume_volume pv ON pv.perfume_volume_ID = od.perfume_volume_ID
+                            JOIN perfumes p ON p.perfume_ID = pv.perfume_ID
+                            JOIN inventory i ON i.inventory_ID = osa.inventory_ID
+                            JOIN branches b ON b.branch_ID = i.branch_ID
+                            WHERE o.order_ID = '$order_ID'");
 }
 ?>
 
@@ -77,34 +82,15 @@ if (isset($_GET['filter'])) {
     <div class="container flex-column main p-5">
       <div class="d-flex flex-row justify-content-between mb-4">
         <h3 class="page-title">
-          Orders
+          Order Supply Assignments - Order <?= $order_ID ?>
         </h3>
-
-        <div class="dropdown">
-          <a class="btn btn-primary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            Select Status Filter
-          </a>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="ibm_orders.php?filter=Preparing">Preparing</a></li>
-            <li><a class="dropdown-item" href="ibm_orders.php?filter=Ready">Ready</a></li>
-            <li><a class="dropdown-item" href="ibm_orders.php?filter=Shipping">Shipping</a></li>
-            <li><a class="dropdown-item" href="ibm_orders.php?filter=Completed">Completed</a></li>
-            <li><a class="dropdown-item" href="ibm_orders.php?filter=Cancelled">Cancelled</a></li>
-          </ul>
-        </div>
       </div>
-
-      <?php if (isset($_GET['msg'])) { ?>
-      <div class="alert alert-info" role="alert">
-        <?= $_GET['msg'] ?>
-      </div>
-      <?php } ?>
 
       <div class="bottom-bar p-3">
         <div class="d-flex flex-row justiy-content-around">
-          <form method="POST" action="ship_all_ready_orders.php">
+          <form method="GET" action="ibm_orders.php">
             <button class="btn btn-primary">
-              Ship out ready orders
+              Back
             </button>
           </form>
         </div>
@@ -116,76 +102,54 @@ if (isset($_GET['filter'])) {
             <div class="row">
               <div class="col">
                 <h5 class="card-title">
-                  Order ID
+                  OSA ID
                 </h5>
               </div>
               <div class="col">
                 <h5 class="card-title">
-                  Date Placed
+                  Order Item
                 </h5>
               </div>
               <div class="col">
                 <h5 class="card-title">
-                  Status
+                  SKU
                 </h5>
               </div>
               <div class="col">
                 <h5 class="card-title">
-                  Last Update
+                  Branch
                 </h5>
-              </div>
-              <div class="col">
-
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <?php while ($row = $resultOrders->fetch_assoc()) { ?>
-      <a href="ibm_viewosa.php?id=<?= $row['order_id'] ?>">
+      <?php while ($row = $resultOSA->fetch_assoc()) { ?>
+      <a href="#">
         <div class="card item">
         <div class="card-body">
           <div class="container text-left">
             <div class="row">
               <div class="col">
                 <p class="card-text">
-                  <?= $row['order_id'] ?>
+                  <?= $row['id'] ?>
                 </p>
               </div>
               <div class="col">
                 <p class="card-text">
-                  <?= $row['order_date'] ?>
+                  <?= $row['item'] ?>
                 </p>
               </div>
               <div class="col">
                 <p class="card-text">
-                  <?= $row['order_status'] ?>
+                  <?= $row['sku'] ?>
                 </p>
               </div>
               <div class="col">
                 <p class="card-text">
-                  <?= $row['last_update'] ?>
+                  <?= $row['branch'] ?>
                 </p>
-              </div>
-              <div class="col">
-                <form method="POST" action="ship_out_order.php">
-                  <input type="hidden" value="<?= $row['order_id'] ?>" name="order_id">
-                  <?php if ($row['order_status'] != 'Shipping'): ?>
-                    <input type="hidden" name="action" value="ship">
-                  <?php else: ?>
-                   <input type="hidden" name="action" value="complete">
-                  <?php endif; ?>
-                  <button class="btn btn-primary 
-                    <?php if ($row['order_status'] != 'Ready' && $row['order_status'] != 'Shipping') { echo 'disabled'; } ?>"
-                    <?php if ($row['order_status'] != 'Ready' && $row['order_status'] != 'Shipping') { echo 'disabled'; } ?>>
-                    <?php if ($row['order_status'] != 'Shipping'): ?>
-                      Ship out
-                    <?php else: ?>
-                      Complete
-                    <?php endif; ?>
-                  </button>
-                </form>
               </div>
             </div>
           </div>
