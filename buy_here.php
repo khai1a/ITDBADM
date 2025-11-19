@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'db_connect.php'; // your database connection
+require 'db_connect.php';
 
 $customerID = $_SESSION['customer_ID'] ?? null;
 $customerCountry = null;
@@ -13,13 +13,13 @@ if ($customerID !== null) {
     $stmt->close();
 }
 
-// --- Handle AJAX Add to Cart ---
+// add to cart
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_to_cart') {
     $perfumeVolID = $_POST['perfume_volume_ID'] ?? '';
     $quantity = intval($_POST['quantity'] ?? 1);
 
     if ($customerID && $perfumeVolID) {
-        // Get or create cart
+        // get/create cart
         $cartStmt = $conn->prepare("SELECT cart_ID FROM cart WHERE customer_ID = ?");
         $cartStmt->bind_param("s", $customerID);
         $cartStmt->execute();
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
         $cartStmt->close();
 
-        // Insert cart item
+        // add to cart
         $cartItemCount = $conn->query("SELECT COUNT(*) as c FROM cart_items")->fetch_assoc()['c'];
         $cartItemID = 'CI' . str_pad($cartItemCount + 1, 6, '0', STR_PAD_LEFT);
         $insItem = $conn->prepare("INSERT INTO cart_items (cart_item_ID, cart_ID, perfume_volume_ID, quantity) VALUES (?, ?, ?, ?)");
@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
-// --- GET FILTERS ---
+// filters
 $filter_brand = $_GET['brand'] ?? 'All';
 $filter_gender = $_GET['gender'] ?? 'All';
 $filter_country = $_GET['country'] ?? '';
@@ -59,11 +59,11 @@ $sort = $_GET['sort'] ?? 'name_asc';
 $page = max(1, intval($_GET['page'] ?? 1));
 $perPage = 9;
 
-// --- CURRENCY ---
+// currency
 $filter_currency = $_GET['currency'] ?? 'USD';
 $currencyList = $conn->query("SELECT currency, fromUSD, currency_sign FROM currencies ORDER BY currency ASC");
 
-// Selected currency
+// selected currency
 $currencyRate = 1.0;
 $currencySign = '$';
 $curStmt = $conn->prepare("SELECT fromUSD, currency_sign FROM currencies WHERE currency = ?");
@@ -77,14 +77,13 @@ if ($curRes && $curRes->num_rows > 0) {
 }
 $curStmt->close();
 
-// --- FETCH TOTAL INVENTORY PER PERFUME VOLUME ---
+// inventory
 $inventoryTotals = [];
 $invRes = $conn->query("SELECT perfume_volume_ID, SUM(quantity) as total_qty FROM inventory GROUP BY perfume_volume_ID");
 while ($row = $invRes->fetch_assoc()) {
     $inventoryTotals[$row['perfume_volume_ID']] = intval($row['total_qty']);
 }
 
-// --- Build WHERE clause ---
 $where = "1=1";
 $params = [];
 $types = '';
@@ -106,7 +105,7 @@ if ($filter_country === "exclusive") {
     $where .= " AND p.is_exclusive = 1";
 }
 
-// --- SORT ---
+// sort filters
 $sortSQL = "p.perfume_name ASC";
 switch ($sort) {
     case "name_desc": $sortSQL = "p.perfume_name DESC"; break;
@@ -116,7 +115,7 @@ switch ($sort) {
     case "price_high": $sortSQL = "pv.selling_price DESC"; break;
 }
 
-// --- COUNT TOTAL PRODUCTS ---
+// total products
 $countSQL = "SELECT COUNT(*) as total
 FROM perfumes p
 JOIN brands b ON p.brand_ID = b.brand_ID
@@ -131,7 +130,7 @@ $stmt->close();
 $pages = ($totalProducts > 0) ? ceil($totalProducts / $perPage) : 1;
 $offset = ($page - 1) * $perPage;
 
-// --- FETCH PRODUCTS ---
+// perfumes
 $productSQL = "SELECT p.perfume_ID, p.perfume_name, p.Gender, p.image_name, b.brand_name, c.country_name, p.country_ID, p.is_exclusive, pv.perfume_volume_ID, pv.selling_price
 FROM perfumes p
 JOIN brands b ON p.brand_ID = b.brand_ID
@@ -150,11 +149,10 @@ $stmt->execute();
 $products = $stmt->get_result();
 $stmt->close();
 
-// --- FETCH ALL BRANDS ---
+// brands
 $brandList = $conn->query("SELECT brand_name FROM brands ORDER BY brand_name ASC");
 $countryList = $conn->query("SELECT country_ID, country_name FROM countries ORDER BY country_name ASC");
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -168,7 +166,7 @@ $countryList = $conn->query("SELECT country_ID, country_name FROM countries ORDE
 </head>
 <body>
 
-<!-- Navbar -->
+<!-- navbar -->
 <nav class="navbar navbar-expand-lg shadow-sm">
 <div class="container">
     <a class="navbar-brand" href="customer_home.php">Aurum Scents</a>
@@ -198,7 +196,7 @@ $countryList = $conn->query("SELECT country_ID, country_name FROM countries ORDE
         <div class="icons-container">
             <a class="nav-link me-3" href="cart.php"><i class="fa fa-cart-shopping"></i></a>
 
-            <!-- Currency Selector -->
+            <!-- currency -->
             <div class="dropdown currency-dropdown">
                 <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
                     Currency: <?= htmlspecialchars($filter_currency) ?>
@@ -221,7 +219,7 @@ $countryList = $conn->query("SELECT country_ID, country_name FROM countries ORDE
 </div>
 </nav>
 
-<!-- Filters + Catalog -->
+<!-- filters tas catalog -->
 <div class="container mt-4">
 <h2 class="fw-bold">All Perfumes</h2>
 <?php
@@ -251,7 +249,7 @@ if ($sort !== "name_asc") $activeFilters[] = "Sort: <strong>{$sortLabels[$sort]}
 <div class="container">
 <div class="row">
 
-    <!-- Filters Sidebar -->
+    <!-- sidebar -->
     <div class="col-md-3 mb-4">
         <form method="GET" action="buy_here.php" class="filter-card p-3">
             <h4>Filters</h4>
@@ -294,7 +292,7 @@ if ($sort !== "name_asc") $activeFilters[] = "Sort: <strong>{$sortLabels[$sort]}
         </form>
     </div>
 
-    <!-- Products -->
+    <!-- perfumes -->
     <div class="col-md-9">
         <div class="row g-4" id="perfumeCatalog">
             <?php if ($products && $products->num_rows > 0): ?>
@@ -376,7 +374,7 @@ if ($sort !== "name_asc") $activeFilters[] = "Sort: <strong>{$sortLabels[$sort]}
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// Quantity buttons and total
+// qty buttons and total
 document.querySelectorAll('.product-card').forEach(card => {
     const qtyInput = card.querySelector('.qty-input');
     const hiddenQty = card.querySelector('.qty-input-hidden');
@@ -401,7 +399,7 @@ document.querySelectorAll('.product-card').forEach(card => {
     qtyInput.addEventListener('input', updateQty);
 });
 
-// AJAX Add to Cart
+// add to cart
 document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
     btn.addEventListener('click', function() {
         const form = btn.closest('.add-to-cart-form');
@@ -430,4 +428,5 @@ document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
 </script>
 
 </body>
+
 </html>
