@@ -362,6 +362,23 @@ if ($sort !== "name_asc") $activeFilters[] = "Sort: <strong>{$sortLabels[$sort]}
     </div>
 </div>
 
+    <!-- pagination -->
+        <?php if ($products && $products->num_rows > 0): ?>
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                <?php for($i=1;$i<=$pages;$i++): ?>
+                    <li class="page-item <?= $i==$page?'active':'' ?>">
+                        <a class="page-link" href="?brand=<?= urlencode($filter_brand) ?>&gender=<?= urlencode($filter_gender) ?>&country=<?= urlencode($filter_country) ?>&sort=<?= urlencode($sort) ?>&currency=<?= urlencode($filter_currency) ?>&page=<?= $i ?>"><?= $i ?></a>
+                    </li>
+                <?php endfor; ?>
+            </ul>
+        </nav>
+        <?php endif; ?>
+    </div>
+</div>
+</div>
+</section>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 // qty buttons and total
@@ -452,3 +469,4 @@ document.querySelectorAll('.qty-input').forEach(input => {
 </script>
 </body>
 </html>
+
