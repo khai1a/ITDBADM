@@ -10,7 +10,7 @@ if (!isset($_SESSION['customer_ID'])) {
 $customer_ID = $_SESSION['customer_ID'];
 $messages = [];
 
-// Fetch user data and address
+// customer info
 $sql = "SELECT c.first_name, c.last_name, c.country_ID, c.email, c.password AS hashed_password, c.mobile_number, c.birthday,
         ca.address_line1, ca.address_line2, ca.city, ca.province, ca.postal_code, ca.address_ID
         FROM customers c
@@ -23,14 +23,14 @@ $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 $stmt->close();
 
-// Fetch countries
+// countries
 $countries = [];
 $country_result = $conn->query("SELECT country_ID, country_name FROM countries ORDER BY country_name ASC");
 while($row = $country_result->fetch_assoc()) {
     $countries[] = $row;
 }
 
-// Handle POST
+// POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $first = trim($_POST['first_name']);
@@ -47,12 +47,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $errors = [];
 
-    // Prepend + if missing
+    // add + sa phone number
     if ($mobile && !str_starts_with($mobile, '+')) {
         $mobile = '+' . preg_replace('/\D/', '', $mobile);
     }
 
-    // Validation
+    // error handling
     if (empty($first)) $errors[] = "First name cannot be empty.";
     if (empty($last)) $errors[] = "Last name cannot be empty.";
     if (!empty($password) && !preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$/', $password)) 
@@ -65,19 +65,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!in_array($country_ID, array_column($countries, 'country_ID'))) 
         $errors[] = "Invalid country selected.";
 
-    // Update if no errors
+    // update if no error
     if (empty($errors)) {
 
-        // Only hash password if changed
+        // hash pw back to db if changed
         $hashed_password = !empty($password) ? password_hash($password, PASSWORD_DEFAULT) : $user['hashed_password'];
 
-        // Update customers (exclude birthday since it's read-only)
+        // update customer info to db
         $stmt = $conn->prepare("UPDATE customers SET first_name=?, last_name=?, country_ID=?, password=?, mobile_number=? WHERE customer_ID=?");
         $stmt->bind_param("ssssss", $first, $last, $country_ID, $hashed_password, $mobile, $customer_ID);
         $stmt->execute();
         $stmt->close();
 
-        // Update or insert address
+        // update address
         if ($user['address_ID']) {
             $stmt = $conn->prepare("UPDATE customer_addresses SET address_line1=?, address_line2=?, city=?, province=?, postal_code=?, country_ID=? WHERE address_ID=?");
             $stmt->bind_param("sssssss", $address_line1, $address_line2, $city, $province, $postal_code, $country_ID, $user['address_ID']);
@@ -189,7 +189,7 @@ $conn->close();
 </div>
 
 <script>
-// Enable Update button only if there are changes
+// button only seen if there are changes
 const form = document.getElementById('editProfileForm');
 const updateBtn = form.querySelector('.btn-update');
 
@@ -223,3 +223,4 @@ checkChanges();
 </script>
 </body>
 </html>
+
