@@ -1,6 +1,8 @@
 <?php 
-$dbpath = dirname(__DIR__) . "/db_connect.php";
 
+require'check_session.php';
+
+$dbpath = dirname(__DIR__) . "/db_connect.php";
 include($dbpath);
 
 $resultPerfumes = $conn->query("SELECT p.perfume_ID, p.perfume_name, p.concentration, p.Gender, b.brand_name, p.image_name

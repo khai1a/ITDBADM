@@ -1,9 +1,12 @@
 <?php 
+
+require'check_session.php';
+
 $dbpath = dirname(__DIR__) . "/db_connect.php";
 
 include($dbpath);
 
- $resultBranches = $conn->query("SELECT branch_ID FROM branches");
+ $resultBranches = $conn->query("SELECT branch_ID FROM branches ORDER BY branch_ID");
 
 if (isset($_GET['bid'])){
   $selectedBranchID =  $_GET['bid'];

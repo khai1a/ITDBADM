@@ -1,5 +1,7 @@
 <?php
-// ibm_viewreturn.php
+
+require'check_session.php';
+
 $dbpath = dirname(__DIR__) . "/db_connect.php";
 include($dbpath);
 

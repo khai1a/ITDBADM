@@ -1,6 +1,8 @@
 <?php 
-$dbpath = dirname(__DIR__) . "/db_connect.php";
 
+require'check_session.php';
+
+$dbpath = dirname(__DIR__) . "/db_connect.php";
 include($dbpath);
 
 $perfumeID = $_GET['id'];

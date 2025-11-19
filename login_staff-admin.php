@@ -33,12 +33,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 case 'Admin':
                     $message = "Welcome Admin! Redirecting...";
                     $message_type = "success";
-                    echo "<meta http-equiv='refresh' content='2;url=admin_dashboard.php'>";
+                    echo "<meta http-equiv='refresh' content='2;url=Admin/admin_dashboard.php'>";
                     break;
                 case 'Inter-Branch Manager':
                     $message = "Welcome Inter-Branch Manager! Redirecting...";
                     $message_type = "success";
-                    echo "<meta http-equiv='refresh' content='2;url=manager_dashboard.php'>";
+                    echo "<meta http-equiv='refresh' content='2;url=IBM/ibm_dashboard.php'>";
                     break;
                 case 'Branch Manager':
                     $message = "Welcome Branch Manager! Redirecting...";

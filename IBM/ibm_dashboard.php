@@ -1,4 +1,7 @@
 <?php 
+
+require'check_session.php';
+
 $dbpath = dirname(__DIR__) . "/db_connect.php";
 
 include($dbpath);
@@ -76,6 +79,10 @@ function getOrderCount($status, $conn) {
         color: #662222;
       }
 
+      .branch-summary .col{
+        font-size: 15px;
+      }
+
     </style>
   </head>
   <body>
@@ -151,9 +158,9 @@ function getOrderCount($status, $conn) {
                   </div>
 
                   <?php while ($rowBranch = $resultBranches->fetch_assoc()) { ?>
-                  <div class="row">
+                  <div class="row branch-summary">
                     <div class="col">
-                      <div class="card-text">
+                      <div class="card-text ">
                         <?= $rowBranch['branch_ID'] ?>
                       </div>
                     </div>
@@ -163,7 +170,7 @@ function getOrderCount($status, $conn) {
                       </div>
                     </div>
                     <div class="col">
-                      $ <?= number_format(getBranchRevenue($rowBranch['branch_ID'], $conn), 2) ?>
+                      $<?= number_format(getBranchRevenue($rowBranch['branch_ID'], $conn), 2) ?>
                     </div>
                   </div>
                   <?php } ?>

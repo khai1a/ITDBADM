@@ -5,7 +5,7 @@
         </h3>
         <ul class="nav flex-column">
           <li class="nav-item">
-            <a class="nav-link" href="ibm_home.php">
+            <a class="nav-link" href="ibm_dashboard.php">
               Home
             </a>
           </li>
@@ -22,11 +22,6 @@
           <li class="nav-item">
             <a class="nav-link" href="ibm_managereturns.php">
               Returns
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              Payments
             </a>
           </li>
         </ul>
