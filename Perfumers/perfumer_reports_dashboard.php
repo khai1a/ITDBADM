@@ -97,7 +97,7 @@ $data_concentration = [
 
 <div class="content-wrapper">
 
-    <h3 class="mb-4">Perfumer Reports Dashboard</h3>
+    <h3 class="page-title mb-5 mt-3">Reports Dashboard</h3>
 
     <div class="card mb-4">
         <div class="card-header"><b>Top-Selling Perfumes</b></div>
