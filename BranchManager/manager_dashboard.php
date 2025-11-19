@@ -51,8 +51,9 @@ if ($branch_id) {
     <a href="manager_orders.php">Walk-In Orders</a>
     <a href="manager_returns.php">Returns</a>
     <a href="manager_view_orders.php">View Orders</a>
-    <a href="sales_management.php">Sales Management</a> <!-- change to file name -->
+    <a href="sales_management.php">Sales Management</a> 
     <a href="staff_management.php">Staff Management</a>
+    <a href="reset_password_manager.php">Reset Password</a>
   </div>
 </div>
 
