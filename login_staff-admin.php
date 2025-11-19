@@ -5,12 +5,12 @@ session_start();
 $message = "";
 $message_type = "";
 
-// Login handler
+// Login checking
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = mysqli_real_escape_string($conn, $_POST['username']);
     $password = $_POST['password'];
 
-    // Check staff table
+    // Check staff from sql
     $query_staff = "SELECT * FROM staff WHERE username='$username'";
     $result_staff = mysqli_query($conn, $query_staff);
 
@@ -112,6 +112,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </div>
 </body>
 </html>
+
 
 
 
