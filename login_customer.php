@@ -15,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (mysqli_num_rows($result_cust) > 0) {
         $customer = mysqli_fetch_assoc($result_cust);
 
-        // ✅ Correct password verification
+        // verify password
         if (password_verify($password, $customer['password'])) {
             $_SESSION['customer_ID'] = $customer['customer_ID'];
             $_SESSION['role'] = 'customer';
@@ -47,7 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <div class="container">
   <div class="login-card">
 
-    <!-- LEFT -->
+    <!-- LEFT part -->
     <div class="login-left">
       <h3>Welcome Back to <br>Aurum Scents</h3>
 
@@ -66,7 +66,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       </form>
     </div>
 
-    <!-- RIGHT -->
+    <!-- RIGHT part -->
     <div class="login-right">
       <div class="login-right-overlay">
         <h4>New Here?</h4>
@@ -79,6 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </div>
 </body>
 </html>
+
 
 
 
