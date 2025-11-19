@@ -21,7 +21,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['role'] = 'customer';
             $message = "Login successful! Redirecting...";
             $message_type = "success";
-            echo "<meta http-equiv='refresh' content='2;url=perfumes.php'>";
+            echo "<meta http-equiv='refresh' content='2;url=customer_home.php'>";
         } else {
             $message = "Incorrect password.";
             $message_type = "danger";
@@ -79,6 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </div>
 </body>
 </html>
+
 
 
 
