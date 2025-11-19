@@ -5,7 +5,7 @@ require 'db_connect.php';
 $customerID = $_SESSION['customer_ID'] ?? null;
 $customerCountry = null;
 
-// --- Customer country ---
+// country ng customer
 if ($customerID) {
     $stmt = $conn->prepare("SELECT country_ID FROM customers WHERE customer_ID = ?");
     $stmt->bind_param("s", $customerID);
@@ -30,14 +30,14 @@ if ($curRes && $curRes->num_rows > 0) {
 }
 $curStmt->close();
 
-// --- Get perfume_volume_ID ---
+// perfume volume ID
 $perfumeVolID = $_GET['perfume_volume_ID'] ?? '';
 if (!$perfumeVolID) {
     header("Location: buy_here.php");
     exit;
 }
 
-// --- Fetch perfume details ---
+// perfume deets
 $stmt = $conn->prepare("
     SELECT p.*, b.brand_name, c.country_name, pv.volume, pv.selling_price, pv.currency
     FROM perfume_volume pv
@@ -56,13 +56,13 @@ if (!$perfume) {
     exit;
 }
 
-// --- Country restriction ---
+// country exclusivity
 $isRestricted = false;
 if ($perfume['is_exclusive'] == 1 && $customerCountry !== null && !empty($perfume['country_ID']) && $perfume['country_ID'] != $customerCountry) {
     $isRestricted = true;
 }
 
-// --- Accords ---
+// accords
 $accords = [];
 $stmt = $conn->prepare("
     SELECT a.accord_name
@@ -78,7 +78,7 @@ while ($row = $res->fetch_assoc()) {
 }
 $stmt->close();
 
-// --- Notes ---
+// notes
 $notes = [];
 $stmt = $conn->prepare("
     SELECT n.note_name, pn.note_level
@@ -95,7 +95,7 @@ while ($row = $res->fetch_assoc()) {
 }
 $stmt->close();
 
-// --- Inventory ---
+// inventory
 $stmt = $conn->prepare("SELECT SUM(quantity) as total_qty FROM inventory WHERE perfume_volume_ID = ?");
 $stmt->bind_param("s", $perfumeVolID);
 $stmt->execute();
@@ -117,7 +117,7 @@ $soldOut = ($totalStock == 0);
 </head>
 <body>
 
-<!-- Navbar -->
+<!-- navbar -->
 <nav class="navbar navbar-expand-lg shadow-sm">
 <div class="container">
     <a class="navbar-brand" href="customer_home.php">Aurum Scents</a>
@@ -146,7 +146,7 @@ $soldOut = ($totalStock == 0);
 
             <a class="nav-link me-3" href="cart.php"><i class="fa fa-cart-shopping"></i></a>
 
-            <!-- Currency Selector -->
+            <!-- currency -->
             <div class="dropdown currency-dropdown">
                 <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
                     Currency: <?= htmlspecialchars($filter_currency) ?>
@@ -234,3 +234,4 @@ document.getElementById('addToCartBtn')?.addEventListener('click', () => {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
