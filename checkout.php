@@ -8,14 +8,13 @@ if (!$customerID) {
     exit;
 }
 
-// --- Helper: JSON response
 function json_response($arr) {
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode($arr);
     exit;
 }
 
-// --- Currency
+// currency
 $filter_currency = $_GET['currency'] ?? $_SESSION['currency'] ?? 'USD';
 $curStmt = $conn->prepare("SELECT fromUSD, currency_sign FROM currencies WHERE currency = ?");
 $curStmt->bind_param('s', $filter_currency);
@@ -25,7 +24,7 @@ $currencyData = $curRes->fetch_assoc() ?? [];
 $currencyRate = isset($currencyData['fromUSD']) ? floatval($currencyData['fromUSD']) : 1.0;
 $currencySign = $currencyData['currency_sign'] ?? '$';
 
-// --- Fetch customer info + country VAT
+// customer info tas VAT
 $cuStmt = $conn->prepare("
     SELECT c.first_name, c.points, c.birthday, c.country_ID, co.vat_percent
     FROM customers c
@@ -40,7 +39,7 @@ $pointsUSD = floatval($cuRes['points'] ?? 0.0); // points stored in USD
 $customerBirthMonth = !empty($cuRes['birthday']) ? intval(date('m', strtotime($cuRes['birthday']))) : null;
 $vatPercent = isset($cuRes['vat_percent']) ? floatval($cuRes['vat_percent']) : 0.12; // default if missing
 
-// --- Fetch cart items (either selected items[] via GET or all)
+// cart items
 $selectedItemIDs = $_GET['items'] ?? null;
 $cartItems = [];
 $subtotal = 0.0;
@@ -92,11 +91,10 @@ if (!empty($selectedItemIDs) && is_array($selectedItemIDs)) {
     $stmt->close();
 }
 
-// --- VAT
+// VAT
 $vatAmount = $subtotal * $vatPercent;
 $total = $subtotal + $vatAmount;
 
-// --- Checkout session container (reserved only in session)
 if (!isset($_SESSION['checkout'])) {
     $_SESSION['checkout'] = [
         'discount_applied' => null,
@@ -106,16 +104,14 @@ if (!isset($_SESSION['checkout'])) {
     ];
 }
 
-// --- AJAX actions: claim_discount, redeem_points, remove_discount, remove_points, reset_checkout
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $action = $_POST['action'];
-    // ensure JSON response for AJAX endpoints
     header('Content-Type: application/json; charset=utf-8');
 
-    // --- Claim discount (reserve in session only)
+    // claim discount
     if ($action === 'claim_discount') {
 
-        // Prevent multiple discounts per transaction
+        // cannot have more than 1 discount
         if (!empty($_SESSION['checkout']['discount_applied'])) {
             json_response(['status'=>'error','message'=>'A discount was already reserved — only one discount is allowed per transaction.']);
         }
@@ -128,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             json_response(['status'=>'error','message'=>'Please enter a discount code.']);
         }
 
-        // Lookup discount record
+        // check disc record in db
         $dStmt = $conn->prepare("SELECT discount_percent, valid_from, valid_until, customer_ID, birth_month FROM discounts WHERE discount_code = ?");
         $dStmt->bind_param("s", $discountCode);
         $dStmt->execute();
@@ -139,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             json_response(['status'=>'error','message'=>'Discount code does not exist.']);
         }
 
-        // Validate dates (use valid_from and valid_until)
+        // date validation
         $today = date('Y-m-d');
         if (isset($dRes['valid_from']) && strtotime($dRes['valid_from']) > strtotime($today)) {
             json_response(['status'=>'error','message'=>'This discount is not yet valid.']);
@@ -148,32 +144,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             json_response(['status'=>'error','message'=>'Discount code has expired.']);
         }
 
-        // Customer-specific discount check
+        // customer specific discounts
         if (!empty($dRes['customer_ID']) && $dRes['customer_ID'] !== $customerID) {
             json_response(['status'=>'error','message'=>'This discount is not valid for your account.']);
         }
 
-        // Birthday discount validation by birth_month (if discount row has birth_month)
+        // bday discount
         if (!empty($dRes['birth_month'])) {
-            // birth_month stored as 1..12 (or '11' etc.)
             $discountMonth = intval($dRes['birth_month']);
             if ($customerBirthMonth === null || $discountMonth !== $customerBirthMonth) {
                 json_response(['status'=>'error','message'=>'This discount is only valid for customers born in month '.$discountMonth.'.']);
             }
         }
 
-        // Check if discount already claimed in DB (someone already redeemed it)
+        // check if claimed
         $checkStmt = $conn->prepare("SELECT claim_ID FROM claimed_discounts WHERE discount_code = ? LIMIT 1");
         $checkStmt->bind_param("s", $discountCode);
         $checkStmt->execute();
         $checkRes = $checkStmt->get_result();
         $checkStmt->close();
         if ($checkRes && $checkRes->num_rows > 0) {
-            // already claimed by someone else / or earlier
+            // already claimed
             json_response(['status'=>'error','message'=>'This discount code has already been claimed and cannot be reserved.']);
         }
 
-        // Passed all checks: reserve in session (no DB insert yet)
+        // no errors
         $_SESSION['checkout']['discount_applied'] = $discountCode;
         $_SESSION['checkout']['discount_percent'] = floatval($dRes['discount_percent'] ?? 0.0);
 
@@ -184,10 +179,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         ]);
     }
 
-    // --- Redeem points (reserve in session only; do NOT deduct DB yet)
+    // redeem points
     if ($action === 'redeem_points') {
 
-        // Prevent redeem if discount reserved
+        // no redeem if in use
         if (!empty($_SESSION['checkout']['discount_applied'])) {
             json_response(['status'=>'error','message'=>'A discount is already reserved — cannot redeem points.']);
         }
@@ -197,17 +192,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             json_response(['status'=>'error','message'=>'Cart subtotal is zero — nothing to redeem points on.']);
         }
 
-        // Points converted to displayed currency
+        // convert points to currency chosen
         $pointsConverted = $pointsUSD * $currencyRate;
         if ($pointsConverted <= 0) {
             json_response(['status'=>'error','message'=>'You have no points to redeem.']);
         }
 
-        $maxAllowed = $currentSubtotal * 0.10; // 10% cap
+        $maxAllowed = $currentSubtotal * 0.10; // points can only use 10% of subtotal
         $useAmountDisplayed = min($pointsConverted, $maxAllowed);
         $useAmountUSD = $useAmountDisplayed / max(0.00001, $currencyRate);
 
-        // Reserve (session only)
         $_SESSION['checkout']['points_redeemed_amount'] = floatval(round($useAmountDisplayed, 2));
         $_SESSION['checkout']['points_used_usd'] = floatval(round($useAmountUSD, 6));
 
@@ -220,21 +214,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
         ]);
     }
 
-    // --- Remove discount (clear reservation only)
+    // remove disc
     if ($action === 'remove_discount') {
         $_SESSION['checkout']['discount_applied'] = null;
         $_SESSION['checkout']['discount_percent'] = 0.0;
         json_response(['status'=>'success','message'=>'Discount reservation removed.']);
     }
 
-    // --- Remove points (clear reservation only)
+    // remove points
     if ($action === 'remove_points') {
         $_SESSION['checkout']['points_redeemed_amount'] = 0.0;
         $_SESSION['checkout']['points_used_usd'] = 0.0;
         json_response(['status'=>'success','message'=>'Points reservation removed.']);
     }
 
-    // --- Reset checkout (used when leaving the checkout page)
+    // reset checkout when page left
     if ($action === 'reset_checkout') {
         $_SESSION['checkout'] = [
             'discount_applied' => null,
@@ -242,15 +236,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
             'points_redeemed_amount' => 0.0,
             'points_used_usd' => 0.0
         ];
-        // No DB changes; all reservations removed
+        // no change sa db
         json_response(['status'=>'success','message'=>'Checkout reset.']);
     }
 
-    // invalid action
     json_response(['status'=>'error','message'=>'Invalid action.']);
 }
 
-// --- Compute display totals (consider session reservations)
+// totals
 $appliedDiscount = $_SESSION['checkout']['discount_applied'] ?? null;
 $appliedDiscountPercent = floatval($_SESSION['checkout']['discount_percent'] ?? 0.0);
 $pointsRedeemedDisplay = floatval($_SESSION['checkout']['points_redeemed_amount'] ?? 0.0);
@@ -276,7 +269,7 @@ $pointsConvertedDisplay = $pointsUSD * $currencyRate;
 </head>
 <body>
 
-<!-- Navigation Bar -->
+<!-- navbar -->
 <nav class="navbar navbar-expand-lg shadow-sm">
   <div class="container">
     <a class="navbar-brand" href="customer_home.php">Aurum Scents</a>
@@ -310,7 +303,7 @@ $pointsConvertedDisplay = $pointsUSD * $currencyRate;
   </div>
 </nav>
 
-<!-- CHECKOUT MAIN SECTION -->
+<!-- checkout -->
 <section class="checkout-section py-5">
   <div class="container">
     <div class="checkout-box mx-auto">
@@ -321,7 +314,7 @@ $pointsConvertedDisplay = $pointsUSD * $currencyRate;
 
       <h2 class="title text-center">Checkout</h2>
 
-      <!-- CART ITEMS -->
+      <!-- cart items -->
       <div class="items-box mb-4">
         <h4 class="section-title">Your Items</h4>
         <?php if(count($cartItems) > 0): ?>
@@ -336,7 +329,7 @@ $pointsConvertedDisplay = $pointsUSD * $currencyRate;
         <?php endif; ?>
       </div>
 
-      <!-- Summary -->
+      <!-- summary -->
       <div class="summary-box mb-4">
         <h4 class="section-title">Summary</h4>
         <p class="summary-line">Subtotal: <span><?= $currencySign . number_format($displaySubtotal, 2) ?></span></p>
@@ -361,7 +354,7 @@ $pointsConvertedDisplay = $pointsUSD * $currencyRate;
         <p class="summary-line total">Total: <span><?= $currencySign . number_format($displayGrandTotal, 2) ?></span></p>
       </div>
 
-      <!-- Points Section -->
+      <!-- points -->
       <div class="points-box mb-3">
         <h4 class="section-title">Your Points</h4>
         <p>Points balance (stored as USD): <strong><?= number_format($pointsUSD, 2) ?> USD</strong></p>
@@ -378,7 +371,7 @@ $pointsConvertedDisplay = $pointsUSD * $currencyRate;
         </div>
       </div>
 
-      <!-- Discount Code -->
+      <!-- discount -->
       <div class="discount-box mb-3">
         <h4 class="section-title">Discount Code</h4>
         <div class="d-flex gap-2">
@@ -392,7 +385,7 @@ $pointsConvertedDisplay = $pointsUSD * $currencyRate;
         </div>
       </div>
 
-      <!-- Payment Method -->
+      <!-- payment only card -->
       <div class="payment-box mb-3">
         <h4 class="section-title">Payment Method</h4>
         <label class="payment-option">
@@ -401,21 +394,21 @@ $pointsConvertedDisplay = $pointsUSD * $currencyRate;
         </label>
       </div>
 
-      <!-- Confirm Button (actual DB changes happen in order_confirmation.php) -->
+      <!-- confirm to oc para macarry over values -->
       <form id="confirmForm" method="POST" action="order_confirmation.php">
         <?php if (!empty($cartItems)): foreach($cartItems as $item): ?>
             <input type="hidden" name="items[]" value="<?= htmlspecialchars($item['cart_item_ID']) ?>">
             <input type="hidden" name="qtys[]" value="<?= intval($item['quantity']) ?>">
         <?php endforeach; endif; ?>
         
-         <!-- CURRENCY -->
+         <!-- currency -->
         <input type="hidden" name="currency" value="<?= htmlspecialchars($filter_currency) ?>">
 
-        <!-- DISCOUNT -->
+        <!-- discount -->
         <input type="hidden" name="discount_code" value="<?= htmlspecialchars($appliedDiscount ?? '') ?>">
         <input type="hidden" name="discount_percent" value="<?= number_format($appliedDiscountPercent, 6, '.', '') ?>">
 
-        <!-- POINTS -->
+        <!-- points -->
         <input type="hidden" name="points_redeemed_amount" value="<?= number_format($pointsRedeemedDisplay, 2, '.', '') ?>">
         <input type="hidden" name="points_used_usd" value="<?= number_format($_SESSION['checkout']['points_used_usd'] ?? 0.0, 6, '.', '') ?>">
 
@@ -431,14 +424,13 @@ $pointsConvertedDisplay = $pointsUSD * $currencyRate;
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// Helper
 function setFeedback(elem, text, type='error') {
     elem.textContent = text;
     elem.classList.remove('error','success');
     elem.classList.add(type === 'error' ? 'error' : 'success');
 }
 
-// Apply Discount
+// apply discount
 const applyBtn = document.getElementById('applyDiscount');
 const discountInput = document.getElementById('discountCode');
 const discountFeedback = document.getElementById('discountFeedback');
@@ -474,7 +466,7 @@ if (applyBtn) {
     });
 }
 
-// Redeem Points
+// redeem points
 if (redeemBtn) {
     redeemBtn.addEventListener('click', () => {
         if (discountInput && discountInput.disabled) {
@@ -499,7 +491,7 @@ if (redeemBtn) {
     });
 }
 
-// Remove Discount
+// remove discount
 const removeDiscountBtn = document.getElementById('removeDiscountBtn');
 if (removeDiscountBtn) {
     removeDiscountBtn.addEventListener('click', () => {
@@ -516,7 +508,7 @@ if (removeDiscountBtn) {
     });
 }
 
-// Remove Points
+// remove points
 const removePointsBtn = document.getElementById('removePointsBtn');
 if (removePointsBtn) {
     removePointsBtn.addEventListener('click', () => {
@@ -533,8 +525,7 @@ if (removePointsBtn) {
     });
 }
 
-// Reset checkout when leaving page (A: reset when user leaves checkout stage)
-// Use navigator.sendBeacon for best-effort
+// reset checkout
 window.addEventListener('unload', function () {
     try {
         const url = 'checkout.php';
@@ -545,14 +536,12 @@ window.addEventListener('unload', function () {
             const blob = new Blob([params.toString()], { type: 'application/x-www-form-urlencoded' });
             navigator.sendBeacon(url, blob);
         } else {
-            // fallback synchronous XHR (may be blocked in some browsers)
             var xhr = new XMLHttpRequest();
             xhr.open('POST', url, false);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
             xhr.send(params.toString());
         }
     } catch (e) {
-        // ignore
     }
 });
 </script>
