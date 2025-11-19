@@ -20,7 +20,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="admin_discounts.php">
              Discounts
             </a>
           </li>
@@ -30,13 +30,8 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">
-              Countries
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              Currencies
+            <a class="nav-link" href="admin_countries_currencies.php">
+              Currencies & Countries
             </a>
           </li>
         </ul>

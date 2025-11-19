@@ -36,9 +36,16 @@ if (isset($_GET['edit_brand'])) {
     <link href="../css/admin_sidebar.css" rel="stylesheet">
     <link href="../css/admin_general.css" rel="stylesheet">
     <style>
-        body { font-family: 'Poppins', sans-serif; }
-        .main { margin-top: 20px; }
-        .table td, .table th { vertical-align: middle; }
+        body {
+            font-family: 'Poppins', sans-serif; 
+        }
+        .main {
+            margin-top: 20px; 
+        }
+        .table td, 
+        .table th {
+             vertical-align: middle; 
+        }
     </style>
 </head>
 <body>
@@ -103,7 +110,7 @@ if (isset($_GET['edit_brand'])) {
                         <td><?= htmlspecialchars($row['brand_ID']) ?></td>
                         <td><?= htmlspecialchars($row['brand_name']) ?></td>
                         <td><?= htmlspecialchars($row['brand_type']) ?></td>
-                        <td class="text-center">
+                        <td>
                             <a href="?edit_brand=<?= $row['brand_ID'] ?>" class="btn btn-sm btn-info">
                                 <i class="fas fa-edit"></i>
                             </a>
