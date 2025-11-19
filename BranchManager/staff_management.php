@@ -1,12 +1,12 @@
 <?php
-include('db_connect.php');
+include('../db_connect.php');
 session_start();
 
 // --------------------
 // AUTH CHECK
 // --------------------
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Branch Manager') {
-    header("Location: login.php");
+    header("Location: ../login_staff-admin.php");
     exit;
 }
 
