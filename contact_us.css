@@ -1,0 +1,57 @@
+/* gen style */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(120deg,#5a0f1a,#842A3B);
+    color:#fff;
+    min-height:100vh;
+}
+
+/* navbar */
+.navbar {
+    background-color:#eacb99 !important;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:20px 50px;
+}
+.navbar .navbar-brand {color:#5a0f1a !important; font-weight:700; font-size:1.6rem;}
+.navbar .nav-links-container {display:flex; flex:1; justify-content:center; gap:40px;}
+.navbar .nav-link {color:#5a0f1a !important; font-weight:600;}
+.navbar .nav-link:hover {color:#a3485a !important;}
+.icons-container {display:flex; align-items:center; gap:15px;}
+.fa-user, .fa-shopping-cart {font-size:1.3rem; color:#5a0f1a; cursor:pointer;}
+
+/* contact us */
+.contact-section {padding:60px 0;}
+.contact-section h2 {color:#eacb99; font-weight:700;}
+.contact-sub {font-size:16px; color:#f5e4c8;}
+.contact-card {background-color:#fffaf3; border-radius:20px; color:#5a0f1a; box-shadow:0 6px 20px rgba(0,0,0,0.25);}
+.contact-card h4 {font-weight:700; color:#5a0f1a;}
+.submit-btn {background-color:#a3485a; color:#fff; border-radius:30px; padding:10px; font-weight:600; width:100%;}
+.submit-btn:hover {background-color:#701c2a;}
+
+/* socmed */
+.socials p {font-size:18px; margin:5px 0;}
+.socials i {margin-right:8px; color:#eacb99;}
+
+/* returns */
+.returns-section {padding:40px; margin-top:40px;}
+.return-card {background-color:#fffaf3; border-radius:20px; color:#5a0f1a; box-shadow:0 6px 20px rgba(0,0,0,0.25);}
+.return-card h4 {font-weight:700; color:#5a0f1a; margin-bottom:20px;}
+#returnOrder, #returnReason {width:100%; padding:10px; border-radius:10px; border:1px solid #ccc; margin-bottom:15px;}
+#submitReturn {background-color:#a3485a; color:#fff; border-radius:30px; padding:10px; font-weight:600; width:100%;}
+#submitReturn:hover {background-color:#701c2a;}
+
+.scroll-dropdown {
+    max-height:150px;
+    overflow-y:auto;
+    background:#fffaf3;
+    color:#5a0f1a;
+    border-radius:10px;
+    padding:5px;
+}
+.scroll-dropdown::-webkit-scrollbar {width:6px;}
+.scroll-dropdown::-webkit-scrollbar-thumb {background:#a3485a; border-radius:3px;}
+.scroll-dropdown option {padding:5px;}
