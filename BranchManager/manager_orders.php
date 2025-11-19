@@ -470,12 +470,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <div class="sidebar">
     <div class="sidebar-top"><h1>Aurum Scents</h1></div>
     <div class="sidebar-bottom">
-    <a href="manager_dashboard.php">Dashboard</a>
+        <a href="manager_dashboard.php">Dashboard</a>
     <a href="manager_inventory.php">Inventory</a>
     <a href="manager_orders.php">Walk-In Orders</a>
     <a href="manager_returns.php">Returns</a>
     <a href="manager_view_orders.php">View Orders</a>
-    <a href="sales_management.php">Sales Management</a> 
+    <a href="sales_management.php">Sales Management</a> <!-- change to file name -->
     <a href="staff_management.php">Staff Management</a>
     </div>
   </div>
