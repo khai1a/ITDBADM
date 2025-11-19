@@ -54,7 +54,6 @@ h2 {
   border-color: #f0d7b5 !important;
 }
 
-/* Button container */
 .button-container {
   display: flex;
   justify-content: center;
@@ -78,7 +77,6 @@ h2 {
   background-color: #701c2a;
 }
 
-/* Back button */
 .btn-secondary, .btn-back {
   background-color: #f5daa7;
   border: none;
@@ -105,3 +103,4 @@ h2 {
     transform: translateY(0);
   }
 }
+
