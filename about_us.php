@@ -9,7 +9,7 @@
 </head>
 <body>
 
-<!-- Navigation Bar -->
+<!-- navbar -->
 <nav class="navbar navbar-expand-lg shadow-sm">
     <div class="container">
         <a class="navbar-brand" href="customer_home.php">Aurum Scents</a>
@@ -49,13 +49,10 @@
     </div>
 </nav>
 
-<!-- About Us Section -->
 <section class="container mt-5 mb-5 text-light">
 
-    <!-- Section Title -->
     <h1 class="text-center mb-5" style="color: #eacb99; font-weight: 700;">About Aurum Scents</h1>
 
-    <!-- Row 1: Text → Image -->
     <div class="row align-items-center mb-5">
         <div class="col-md-6">
             <h3 class="mb-3" style="color: #f5daa7;">Our Story</h3>
@@ -72,7 +69,6 @@
         </div>
     </div>
 
-    <!-- Row 2: Image → Text -->
     <div class="row align-items-center mb-5 flex-md-row-reverse">
         <div class="col-md-6">
             <h3 class="mb-3" style="color: #f5daa7;">Our Mission</h3>
@@ -89,7 +85,6 @@
         </div>
     </div>
 
-    <!-- Buy Button -->
     <div class="text-center mt-4">
         <a href="buy_here.php" class="btn px-4 py-2" 
             style="background-color: #eacb99; color: #5a0f1a; font-weight: 700; border-radius: 30px; font-size: 1.2rem;">
