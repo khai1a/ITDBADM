@@ -218,18 +218,12 @@ $resultAccords = $conn->query("SELECT * FROM accords");
           </div>
         </div>
 
-        <!-- RIGHT: DETAILS (ACCORDS, NOTES, VOLUMES) -->
         <div class="col-md-8">
-
-          <!-- ACCORDS + VOLUMES -->
           <div class="row">
-            <!-- ACCORDS -->
             <div class="col-md-6 mb-4">
               <div class="card shadow-sm h-100">
                 <div class="card-header">Accords</div>
                 <div class="card-body">
-
-                  <!-- MAIN ACCORD -->
                   <form method="POST" action="update_primary_accord.php">
                     <small class="text-muted d-block mb-1">Main accord</small>
                     <div class="input-group input-group-sm mb-3">
@@ -250,7 +244,6 @@ $resultAccords = $conn->query("SELECT * FROM accords");
                     </div>
                   </form>
 
-                  <!-- OTHER ACCORDS LIST -->
                   <small class="text-muted d-block mb-1">Secondary accords</small>
 
                   <?php while ($secAccords = $resultSecondaryAccords->fetch_assoc()) { ?>
@@ -266,7 +259,6 @@ $resultAccords = $conn->query("SELECT * FROM accords");
                     </form>
                   <?php } ?>
 
-                  <!-- ADD NEW ACCORD -->
                   <form method="POST" action="add_secondary_accord.php" class="mt-3">
                     <div class="input-group input-group-sm">
                      <select class="form-control" name="accord">
@@ -287,7 +279,6 @@ $resultAccords = $conn->query("SELECT * FROM accords");
               </div>
             </div>
 
-            <!-- VOLUMES -->
             <div class="col-md-6 mb-4">
               <div class="card shadow-sm h-100">
                 <div class="card-header">Available Volumes</div>
@@ -333,7 +324,6 @@ $resultAccords = $conn->query("SELECT * FROM accords");
 
                   <hr>
 
-                  <!-- ADD VOLUME -->
                   <form method="POST" action="add_volume.php">
                     <div class="section-title mb-2">Add volume</div>
                     <div class="form-row">
@@ -361,7 +351,6 @@ $resultAccords = $conn->query("SELECT * FROM accords");
               <div class="card-body">
                 <div class="row">
 
-                <!-- Top notes -->
                   <div class="col-md-4 notes-column mb-3">
                     <h6>Top Notes</h6>
 
@@ -376,7 +365,6 @@ $resultAccords = $conn->query("SELECT * FROM accords");
                       </form>
                     <?php } ?>
 
-                    <!-- Add note -->
                     <form method="POST" action="add_note.php">
                       <div class="input-group input-group-sm mt-2">
                         <select name="note" id="topNote" class="form-control">
@@ -394,7 +382,6 @@ $resultAccords = $conn->query("SELECT * FROM accords");
                     </form>
                   </div>
 
-                  <!-- Middle Notes -->
                   <div class="col-md-4 notes-column mb-3">
                     <h6>Middle Notes</h6>
 
@@ -427,7 +414,6 @@ $resultAccords = $conn->query("SELECT * FROM accords");
                     </form>
                   </div>
 
-                  <!-- Base notes -->
                   <div class="col-md-4 mb-3 notes-column">
                     <h6>Base Notes</h6>
 
@@ -462,11 +448,9 @@ $resultAccords = $conn->query("SELECT * FROM accords");
                 </div>
               </div>
             </div>
-        </div><!-- /col-md-8 -->
-        
-      </div><!-- /row -->
-      
-    </div><!-- /container -->
+        </div>
+      </div>
+    </div>
 
     <?php $conn->close(); ?>
   </body>
