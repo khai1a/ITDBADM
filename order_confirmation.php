@@ -2,7 +2,6 @@
 session_start();
 require 'db_connect.php';
 
-// Ensure user is logged in
 if (!isset($_SESSION['customer_ID'])) {
     header("Location: login_customer.php");
     exit;
@@ -10,12 +9,12 @@ if (!isset($_SESSION['customer_ID'])) {
 
 $customerID = $_SESSION['customer_ID'];
 
-// --- Get POST data
+// POST data
 $cartItemIDs = $_POST['items'] ?? [];
 $qtys = $_POST['qtys'] ?? [];
 $currency = $_POST['currency'] ?? 'USD';
 
-// --- Discount & points from POST or session
+// discount & points from POST
 $discountCode = $_POST['discount_code'] ?? ($_SESSION['checkout']['discount_applied'] ?? null);
 $discountPercent = floatval($_POST['discount_percent'] ?? ($_SESSION['checkout']['discount_percent'] ?? 0.0));
 $pointsToRedeem = floatval($_POST['points_used_usd'] ?? ($_SESSION['checkout']['points_used_usd'] ?? 0.0));
@@ -23,7 +22,7 @@ $pointsToRedeem = floatval($_POST['points_used_usd'] ?? ($_SESSION['checkout']['
 $discountCode = trim($discountCode);
 if ($discountCode === '') $discountCode = null;
 
-// --- Fetch currency rate and symbol
+// currency rate tas symbol 
 $currencyRate = 1.0;
 $currencySign = '$';
 $curStmt = $conn->prepare("SELECT fromUSD, currency_sign FROM currencies WHERE currency = ?");
@@ -37,7 +36,7 @@ if ($curRes && $curRes->num_rows) {
 }
 $curStmt->close();
 
-// --- Fetch customer info + VAT
+// customer info tas VAT
 $cuStmt = $conn->prepare("
     SELECT c.first_name, c.points, c.birthday, c.country_ID, co.vat_percent
     FROM customers c
@@ -53,7 +52,7 @@ $customerName = $cuRes['first_name'] ?? '';
 $pointsUSD = floatval($cuRes['points'] ?? 0);
 $vatPercent = floatval($cuRes['vat_percent'] ?? 0.12);
 
-// --- Prepare checkout items
+// mga items nasa checkout
 $checkoutItems = [];
 foreach ($cartItemIDs as $i => $cartItemID) {
     $quantity = intval($qtys[$i] ?? 1);
@@ -80,7 +79,7 @@ foreach ($cartItemIDs as $i => $cartItemID) {
 
 if (empty($checkoutItems)) die("No items in cart.");
 
-// --- Calculate totals in USD
+// total in usd
 $subtotalUSD = 0;
 foreach ($checkoutItems as $item) $subtotalUSD += $item['unit_price'] * $item['quantity'];
 $discountAmountUSD = $subtotalUSD * $discountPercent;
@@ -88,14 +87,14 @@ $subtotalAfterDiscount = max(0, $subtotalUSD - $discountAmountUSD - $pointsToRed
 $vatAmountUSD = $subtotalAfterDiscount * $vatPercent;
 $orderTotalUSD = $subtotalAfterDiscount + $vatAmountUSD;
 
-// --- Convert totals to selected currency
+// convert total to chosen currency
 $displaySubtotal = $subtotalUSD * $currencyRate;
 $displayDiscount = $discountAmountUSD * $currencyRate;
 $displayPoints = $pointsToRedeem * $currencyRate;
 $displayVAT = $vatAmountUSD * $currencyRate;
 $displayTotal = $orderTotalUSD * $currencyRate;
 
-// --- Helper functions for IDs
+// order ID
 function generateOrderID($conn) {
     $res = $conn->query("SELECT order_ID FROM orders ORDER BY order_ID DESC LIMIT 1");
     $lastID = $res->fetch_assoc()['order_ID'] ?? null;
@@ -103,6 +102,7 @@ function generateOrderID($conn) {
     return 'O' . str_pad($num, 5, '0', STR_PAD_LEFT);
 }
 
+// order details ID
 function generateOrderDetailID($conn) {
     $res = $conn->query("SELECT order_detail_ID FROM order_details ORDER BY order_detail_ID DESC LIMIT 1");
     $lastID = $res->fetch_assoc()['order_detail_ID'] ?? null;
@@ -110,6 +110,7 @@ function generateOrderDetailID($conn) {
     return 'OD' . str_pad($num, 6, '0', STR_PAD_LEFT);
 }
 
+// payment ID
 function generatePaymentID($conn) {
     $res = $conn->query("SELECT payment_ID FROM payments ORDER BY payment_ID DESC LIMIT 1");
     $lastID = $res->fetch_assoc()['payment_ID'] ?? null;
@@ -117,6 +118,7 @@ function generatePaymentID($conn) {
     return 'PM' . str_pad($num, 4, '0', STR_PAD_LEFT);
 }
 
+// points_transactions ID if used
 function generatePointsTransactionID($conn) {
     $res = $conn->query("SELECT transaction_ID FROM points_transactions ORDER BY transaction_ID DESC LIMIT 1");
     $lastID = $res->fetch_assoc()['transaction_ID'] ?? null;
@@ -124,6 +126,7 @@ function generatePointsTransactionID($conn) {
     return 'PT' . str_pad($num, 5, '0', STR_PAD_LEFT);
 }
 
+// claimed discounts ID if used
 function generateClaimID($conn) {
     $res = $conn->query("SELECT claim_ID FROM claimed_discounts ORDER BY claim_ID DESC LIMIT 1");
     $lastID = $res->fetch_assoc()['claim_ID'] ?? null;
@@ -131,13 +134,13 @@ function generateClaimID($conn) {
     return 'CD' . str_pad($num, 6, '0', STR_PAD_LEFT);
 }
 
-// --- Begin transaction
+// transac begins here
 $conn->begin_transaction();
 
 try {
     $orderID = generateOrderID($conn);
 
-    // --- Insert order
+    // add order to db
     $insOrder = $conn->prepare("
         INSERT INTO orders
         (order_ID, customer_ID, order_total, currency, discount_code, discount_percent, order_type)
@@ -147,7 +150,7 @@ try {
     $insOrder->execute();
     $insOrder->close();
 
-    // --- Insert order details
+    // add order deets to db
     foreach ($checkoutItems as $item) {
         $orderDetailID = generateOrderDetailID($conn);
         $insOD = $conn->prepare("
@@ -161,7 +164,7 @@ try {
         $insOD->close();
     }
 
-    // --- Insert payment
+    // add payment record
     $paymentID = generatePaymentID($conn);
     $insPay = $conn->prepare("
         INSERT INTO payments
@@ -172,7 +175,7 @@ try {
     $insPay->execute();
     $insPay->close();
 
-    // --- Update points if redeemed
+    // update points
     if ($pointsToRedeem > 0) {
         $pointsInt = intval(round($pointsToRedeem));
         $updPoints = $conn->prepare("UPDATE customers SET points = points - ? WHERE customer_ID = ?");
@@ -191,7 +194,7 @@ try {
         $insPT->close();
     }
 
-    // --- Mark discount claimed
+    // claim discount
     if ($discountCode) {
         $claimID = generateClaimID($conn);
         $insClaim = $conn->prepare("INSERT INTO claimed_discounts (claim_ID, discount_code, customer_ID) VALUES (?, ?, ?)");
@@ -200,7 +203,7 @@ try {
         $insClaim->close();
     }
 
-    // --- Clear cart
+    // clear cart
     $cartIDRes = $conn->prepare("SELECT cart_ID FROM cart WHERE customer_ID = ?");
     $cartIDRes->bind_param('s', $customerID);
     $cartIDRes->execute();
@@ -216,7 +219,7 @@ try {
     die("Transaction failed: " . $e->getMessage());
 }
 
-// --- Fetch receipt items
+// resibo
 $receiptItems = [];
 $res = $conn->prepare("
     SELECT od.quantity, od.unit_price, p.perfume_name
@@ -289,3 +292,4 @@ $res->close();
 </section>
 </body>
 </html>
+
