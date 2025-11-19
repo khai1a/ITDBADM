@@ -83,10 +83,11 @@ $orders = array_values($orders);
   <div class="sidebar-top"><h1>Aurum Scents</h1></div>
   <div class="sidebar-bottom">
     <a href="employee_dashboard.php">Dashboard</a>
-    <a href="employee_inventory.php">Inventory</a>
-    <a href="employee_orders.php">Create Order</a>
-    <a href="employee_returns.php">Returns</a>
-    <a href="employee_view_orders.php" class="active">View Orders</a>
+            <a href="employee_inventory.php">Inventory</a>
+            <a href="employee_orders.php">Create Order</a>
+            <a href="employee_returns.php">Returns</a>
+            <a href="employee_view_orders.php" class="active">View Orders</a>
+            <a href="reset_password_employee.php">Reset Password</a>
   </div>
 </div>
 
