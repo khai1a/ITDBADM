@@ -46,7 +46,7 @@ if ($branch_id) {
     <h1>Aurum Scents</h1>
   </div>
   <div class="sidebar-bottom">
-    <a href="manager_dashboard.php">Dashboard</a>
+        <a href="manager_dashboard.php">Dashboard</a>
     <a href="manager_inventory.php">Inventory</a>
     <a href="manager_orders.php">Walk-In Orders</a>
     <a href="manager_returns.php">Returns</a>
