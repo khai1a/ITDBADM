@@ -486,7 +486,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <h2>Create New Walk-In Order</h2>
       <div class="profile-container">
         <div class="profile-icon" onclick="toggleDropdown()">
-          <img src="profileIcon.png" alt="Profile Icon">
+          <img src="../BranchEmployee/profileIcon.png" alt="Profile Icon">
         </div>
         <div id="profile-dropdown" class="dropdown" style="display:none;">
           <p><strong>Username:</strong> <?= htmlspecialchars($employee_username) ?></p>
