@@ -138,7 +138,7 @@ if ($stmt = $conn->prepare($sql)) {
   </div>
 
   <div class="inventory-controls">
-    <form method="get" action="employee_inventory.php" style="display:inline;">
+    <form method="get" action="manager_inventory.php" style="display:inline;">
       <select name="filter" class="stock-filter" onchange="this.form.submit()">
         <option value="all" <?= $filter==='all'?'selected':'' ?>>All</option>
         <option value="in" <?= $filter==='in'?'selected':'' ?>>In Stock</option>
