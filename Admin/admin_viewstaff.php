@@ -59,6 +59,32 @@ $resultStaff = $conn->query("
             border-color: #8c3b4b;
             color: whitesmoke;
         }
+
+        .fab-add {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        background: #F5DAA7;
+        color: #333;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 26px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+        text-decoration: none;
+        transition: 0.25s;
+        z-index: 999;
+      }
+
+      .fab-add:hover {
+        background: #f2cd85;
+        transform: scale(1.08);
+        text-decoration:none !important;
+        color: #333;
+      }
     </style>
 </head>
 <body>
@@ -157,6 +183,10 @@ $resultStaff = $conn->query("
         </div>
     <?php } ?>
 </div>
+
+ <a href="admin_addstaff.php" class="fab-add" title="Add Perfume">
+    <i class="fa-solid fa-plus"></i>
+  </a>
 
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
