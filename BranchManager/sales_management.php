@@ -1,5 +1,5 @@
 <?php
-include('db_connect.php');
+include('../db_connect.php');
 session_start();
 date_default_timezone_set('Asia/Manila'); // fixes "Today" showing previous day
 
@@ -7,7 +7,7 @@ date_default_timezone_set('Asia/Manila'); // fixes "Today" showing previous day
 // AUTH CHECK
 // --------------------
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Branch Manager') {
-    header("Location: login.php");
+    header("Location: ../login_staff-admin.php");
     exit;
 }
 
