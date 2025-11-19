@@ -2,7 +2,6 @@
 session_start();
 require 'db_connect.php';
 
-// Ensure user is logged in
 if (!isset($_SESSION['customer_ID'])) {
     header("Location: login_customer.php");
     exit;
@@ -10,7 +9,7 @@ if (!isset($_SESSION['customer_ID'])) {
 
 $customerID = $_SESSION['customer_ID'];
 
-// Fetch orders + order details + currency
+// fetch info from db
 $sql = "
 SELECT o.order_ID, o.order_date, o.order_status, o.currency, od.quantity, od.unit_price, pv.perfume_ID, p.perfume_name, c.currency_sign
 FROM orders o
@@ -58,7 +57,7 @@ $stmt->close();
 </head>
 <body>
 
-<!-- Navigation Bar -->
+<!-- navbar -->
 <nav class="navbar navbar-expand-lg shadow-sm">
     <div class="container">
         <a class="navbar-brand" href="customer_home.php">Aurum Scents</a>
@@ -157,3 +156,4 @@ $stmt->close();
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
