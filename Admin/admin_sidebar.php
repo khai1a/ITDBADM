@@ -25,13 +25,18 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">
+            <a class="nav-link" href="admin_branches.php">
               Branches
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="admin_countries_currencies.php">
               Currencies & Countries
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="admin_notes_accords.php">
+              Notes & Accords
             </a>
           </li>
         </ul>
