@@ -2,7 +2,7 @@
 session_start();
 require 'db_connect.php';
 
-// Check if user is logged in
+// check if logged-in
 if (!isset($_SESSION['customer_ID'])) {
     header("Location: login_customer.php");
     exit();
@@ -10,7 +10,7 @@ if (!isset($_SESSION['customer_ID'])) {
 
 $customer_ID = $_SESSION['customer_ID'];
 
-// Fetch customer info
+// customer info
 $sql = "SELECT first_name, last_name, points FROM customers WHERE customer_ID = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $customer_ID);
@@ -18,7 +18,7 @@ $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-// Fetch points transaction history
+// points transaction
 $trans_sql = "SELECT order_ID, points_change, transaction_type, transaction_date 
               FROM points_transactions 
               WHERE customer_ID = ? 
@@ -84,3 +84,4 @@ $conn->close();
     </div>
 </body>
 </html>
+

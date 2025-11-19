@@ -1,4 +1,3 @@
-/* General Styles */
 body {
     font-family: 'Poppins', sans-serif;
     margin: 0;
@@ -8,7 +7,7 @@ body {
     min-height: 100vh;
 }
 
-/* Navbar */
+/* navbar */
 .navbar {
     background-color: #eacb99 !important;
     display: flex;
@@ -45,7 +44,6 @@ body {
     cursor: pointer; 
 }
 
-/* Rating Card */
 .rating-card {
     background-color: #fffaf3;
     border-radius: 20px;
@@ -56,7 +54,6 @@ body {
     margin: 40px auto;
 }
 
-/* Messages inside card */
 .message {
     padding: 10px 15px;
     border-radius: 10px;
@@ -74,7 +71,7 @@ body {
     border: 1px solid #d0b080;
 }
 
-/* Stars */
+/* stars */
 .stars {
     display: flex;
     justify-content: center;
@@ -86,7 +83,7 @@ body {
     display: none; 
 }
 .stars label { 
-    color: #d1b7b7; /* neutral color before hover */
+    color: #d1b7b7;
     cursor: pointer; 
     position: relative; 
     transition: 0.2s ease;
@@ -96,14 +93,13 @@ body {
     font-family: "Font Awesome 5 Free"; 
     font-weight: 900; 
 }
-/* Hover + Checked */
+
 .stars label:hover,
 .stars label:hover ~ label,
 .stars input[type="radio"]:checked ~ label {
-    color: #f4c150; /* gold */
+    color: #f4c150;
 }
 
-/* Button */
 .submit-btn {
     background-color: #842A3B;
     color: #fff;
@@ -117,3 +113,4 @@ body {
 .submit-btn:hover { 
     background-color: #5a0f1a; 
 }
+
