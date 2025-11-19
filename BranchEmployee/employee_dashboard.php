@@ -216,10 +216,10 @@ const data = {
     {
       label: 'Units Sold',
       data: <?= json_encode($data) ?>,
-      borderColor: 'rgba(219, 172, 52, 1)',       // gold accent
-      backgroundColor: 'rgba(219, 172, 52, 0.6)', // softer fill
+      borderColor: 'rgba(219, 172, 52, 1)', 
+      backgroundColor: 'rgba(219, 172, 52, 0.6)', 
       borderWidth: 2,
-      borderRadius: 8,   // rounded bars
+      borderRadius: 8, 
       borderSkipped: false,
     }
   ]
