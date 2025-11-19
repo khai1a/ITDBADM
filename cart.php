@@ -8,25 +8,25 @@ if (!$customerID) {
     exit;
 }
 
-// --- Handle currency selection ---
+// currency selection
 if (isset($_GET['currency'])) {
     $_SESSION['currency'] = $_GET['currency'];
 }
 
-// Default to USD if no currency in session
+// USD default
 if (!isset($_SESSION['currency'])) {
     $_SESSION['currency'] = 'USD';
 }
 
 $filter_currency = $_SESSION['currency'];
 
-// --- Handle AJAX requests for cart item updates ---
+// cart requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $action = $_POST['action'];
     $cartItemID = $_POST['cart_item_ID'] ?? '';
     $quantity = $_POST['quantity'] ?? 1;
 
-    // Get cart ID for this customer
+    // cart ID
     $cartRes = $conn->prepare("SELECT cart_ID FROM cart WHERE customer_ID = ?");
     $cartRes->bind_param("s", $customerID);
     $cartRes->execute();
@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     exit;
 }
 
-// --- Fetch cart items ---
+// cart items
 $cartRes = $conn->prepare("
     SELECT ci.cart_item_ID, pv.perfume_ID, pv.volume, pv.selling_price, p.perfume_name, ci.quantity
     FROM cart_items ci
@@ -72,7 +72,7 @@ $cartRes->bind_param("s", $customerID);
 $cartRes->execute();
 $cartItems = $cartRes->get_result();
 
-// --- Fetch currency conversion ---
+// currency conversion
 $curStmt = $conn->prepare("SELECT fromUSD, currency_sign FROM currencies WHERE currency = ?");
 $curStmt->bind_param('s', $filter_currency);
 $curStmt->execute();
@@ -93,7 +93,7 @@ $currencySign = $currencyData['currency_sign'] ?? '$';
 </head>
 <body>
 
-<!-- Navbar -->
+<!-- navbar -->
 <nav class="navbar navbar-expand-lg shadow-sm">
 <div class="container">
     <a class="navbar-brand" href="customer_home.php">Aurum Scents</a>
@@ -122,12 +122,11 @@ $currencySign = $currencyData['currency_sign'] ?? '$';
                     </ul>
                 </div>
 
-                <!-- Cart Icon -->
                 <a class="nav-link" href="cart.php">
                     <i class="fa fa-shopping-cart"></i>
                 </a>
 
-            <!-- Currency Selector -->
+            <!-- currency -->
             <div class="dropdown currency-dropdown">
                 <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
                     Currency: <?= htmlspecialchars($filter_currency) ?>
@@ -150,7 +149,7 @@ $currencySign = $currencyData['currency_sign'] ?? '$';
 </div>
 </nav>
 
-<!-- Cart Section -->
+<!-- cart -->
 <section class="cart-section py-5">
     <div class="container">
         <h2 class="cart-title text-center mb-4">Your Shopping Cart</h2>
@@ -177,7 +176,7 @@ $currencySign = $currencyData['currency_sign'] ?? '$';
                             </div>
                             <button type="button" class="btn btn-remove ms-3"><i class="fa fa-trash"></i></button>
 
-                            <!-- Hidden inputs for checkout -->
+                            <!-- for checkout -->
                             <input type="hidden" name="items[]" value="<?= $item['cart_item_ID'] ?>">
                             <input type="hidden" name="qtys[]" value="<?= $item['quantity'] ?>" class="hidden-qty">
                         </div>
@@ -205,7 +204,7 @@ $currencySign = $currencyData['currency_sign'] ?? '$';
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// Quantity update & subtotal calculation
+// calculation ng qty and total
 document.querySelectorAll('.cart-item').forEach(item => {
     const qtyInput = item.querySelector('.qty-input');
     const totalEl = item.querySelector('.total-price');
@@ -225,7 +224,7 @@ document.querySelectorAll('.cart-item').forEach(item => {
     item.querySelector('.plus-btn').addEventListener('click', () => { qtyInput.value = parseInt(qtyInput.value)+1; updateQty(); });
     qtyInput.addEventListener('input', updateQty);
 
-    // Remove item
+    // remove item
     item.querySelector('.btn-remove').addEventListener('click', () => {
         const cartItemID = item.getAttribute('data-cart-item-id');
         fetch('cart.php', {
@@ -243,7 +242,7 @@ document.querySelectorAll('.cart-item').forEach(item => {
     });
 });
 
-// Calculate subtotal
+// subtotal
 function updateSubtotal() {
     let subtotal = 0;
     document.querySelectorAll('.cart-item').forEach(item => {
