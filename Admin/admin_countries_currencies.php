@@ -53,13 +53,19 @@ if (isset($_GET['edit_country'])) {
         body { font-family: 'Poppins', sans-serif; }
         .main { margin-top: 20px; }
         .table td, .table th { vertical-align: middle; }
+        .top-row {
+            justify-content: space-between !important;
+        }
     </style>
 </head>
 <body>
 <?php if (file_exists('admin_sidebar.php')) require 'admin_sidebar.php'; ?>
 
 <div class="container main mb-5 p-4">
-    <h3 class="mb-4 page-title">Currencies & Countries</h3>
+    <div class="d-flex flex-row top-row align-items-center">
+        <h3 class="mb-4 page-title">Currencies & Countries</h3> 
+        <a class="btn btn-primary" href="callapi.php">Update Rates</a>
+    </div>
 
     <?php if (isset($_GET['message']) && isset($_GET['status'])): 
         $message = $_GET['message']; 

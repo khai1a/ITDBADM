@@ -187,8 +187,8 @@ $resultAccords = $conn->query("SELECT * FROM accords");
         <div class="col-md-4 mb-4">
           <div class="card perfume-card shadow-sm position-relative">
             <div class="card-icons">
-              <a class="icon-btn" title="Edit" href="admin_editperfume.php?id=<?= $row['perfume_ID'] ?>">
-                <i class="fa-solid fa-pen-to-square"></i>
+              <a class="icon-btn" title="Edit" href="admin_deleteperfume.php?id=<?= $row['perfume_ID'] ?>">
+                <i class="fa-solid fa-trash"></i>
               </a>
               <a class="icon-btn" title="View Info" href="#">
                 <i class="fa-solid fa-circle-info"></i>
@@ -357,9 +357,9 @@ $resultAccords = $conn->query("SELECT * FROM accords");
           </div>
 
          <div class="card shadow-sm">
-  <div class="card-header">Notes</div>
-  <div class="card-body">
-    <div class="row">
+            <div class="card-header">Notes</div>
+              <div class="card-body">
+                <div class="row">
 
                 <!-- Top notes -->
                   <div class="col-md-4 notes-column mb-3">
@@ -459,13 +459,13 @@ $resultAccords = $conn->query("SELECT * FROM accords");
                       </div>
                     </form>
                   </div>
-
                 </div>
               </div>
             </div>
-
         </div><!-- /col-md-8 -->
+        
       </div><!-- /row -->
+      
     </div><!-- /container -->
 
     <?php $conn->close(); ?>

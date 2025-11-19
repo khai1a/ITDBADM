@@ -91,7 +91,7 @@ function getOrderCount($status, $conn) {
 
     <div class="container flex-column p-5 main">
         <h3 class="greeting">
-          Hi there! :&rpar;
+          Hi, <?= $_SESSION['username'] ?>
         </h3>
       <div class="container text-center dashboard">
         <div class="row mb-4">
