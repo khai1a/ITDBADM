@@ -75,12 +75,12 @@ $data_concentration = [
 <head>
     <title>Perfumer Reports Dashboard</title>
 
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css">
     <link href="../css/admin_sidebar.css" rel="stylesheet">
     <link href="../css/admin_general.css" rel="stylesheet">
 
     <style>
-        body { font-family: "Poppins", sans-serif; }
         .card-header { background:#842A3B; color:white; }
         .chart-box { height:300px; }
         .chart-small { height:220px; }
