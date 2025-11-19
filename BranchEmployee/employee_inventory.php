@@ -113,7 +113,7 @@ if ($stmt = $conn->prepare($sql)) {
   <div class="sidebar-bottom">
     <a href="employee_dashboard.php">Dashboard</a>
     <a href="employee_inventory.php">Inventory</a>
-    <a href="employee_orders.php">Walk-In Orders</a>
+    <a href="employee_orders.php">Create Orders</a>
     <a href="employee_returns.php">Returns</a>
     <a href="employee_view_orders.php">View Orders</a>
   </div>
