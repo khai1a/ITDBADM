@@ -1,0 +1,111 @@
+/* General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(120deg, #5a0f1a, #842A3B);
+    color: #333;
+    min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+    background-color: #eacb99 !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 50px;
+}
+
+.navbar .navbar-brand {
+    color: #5a0f1a !important;
+    font-weight: 700;
+    font-size: 1.6rem;
+}
+
+.navbar .nav-links-container {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    gap: 40px;
+}
+
+.navbar .nav-link {
+    color: #5a0f1a !important;
+    font-weight: 600;
+}
+
+.navbar .nav-link:hover {
+    color: #a3485a !important;
+}
+
+.icons-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.fa-user, .fa-shopping-cart {
+    font-size: 1.3rem;
+    color: #5a0f1a;
+    cursor: pointer;
+}
+
+/* Orders Section */
+.orders-section {
+    min-height: 80vh;
+    padding: 50px 0;
+}
+
+/* Orders Table */
+.orders-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 15px;
+    overflow: hidden;
+    background-color: #fffaf3;
+}
+
+.orders-table th {
+    background-color: #eacb99;
+    color: #5a0f1a;
+    font-weight: 700;
+    padding: 12px;
+}
+
+.orders-table td {
+    color: #5a0f1a;
+    padding: 12px;
+    vertical-align: middle;
+}
+
+.orders-table tr:nth-child(even) {
+    background-color: #fff2e0;
+}
+
+.orders-table tr:hover {
+    background-color: #f4d9b0;
+    transition: 0.3s;
+}
+
+/* Badge Colors: Order Status */
+.badge.placed { background-color: #5bc0de; color: #fff; }
+.badge.preparing { background-color: #f0ad4e; color: #fff; }
+.badge.ready { background-color: #0275d8; color: #fff; }
+.badge.shipping { background-color: #5cb85c; color: #fff; }
+.badge.completed { background-color: #6f42c1; color: #fff; }
+.badge.cancelled { background-color: #d9534f; color: #fff; }
+
+/* Badge Colors: Payment Status */
+.badge.processing { background-color: #f0ad4e; color: #fff; }
+.badge.received { background-color: #5cb85c; color: #fff; }
+.badge.refunded { background-color: #d9534f; color: #fff; }
+
+/* Responsive Table */
+@media (max-width: 768px) {
+    .orders-table th, .orders-table td {
+        padding: 10px 6px;
+        font-size: 0.85rem;
+    }
+}

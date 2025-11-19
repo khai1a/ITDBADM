@@ -1,0 +1,234 @@
+/* General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(120deg, #5a0f1a, #842A3B);
+    color: #333;
+    min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+    background-color: #eacb99 !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 50px; /* taller navbar */
+}
+
+.navbar .navbar-brand {
+    color: #5a0f1a !important;
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.navbar .nav-links-container {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    gap: 40px;
+}
+
+.navbar .nav-link {
+    color: #5a0f1a !important;
+    font-weight: 600;
+    text-align: center;
+}
+
+.navbar .nav-link:hover {
+    color: #a3485a !important;
+}
+
+/* User & Cart Icons */
+.navbar .icons-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.navbar .fa-user, .navbar .fa-cart-shopping {
+    font-size: 1.3rem;
+    color: #5a0f1a;
+    cursor: pointer;
+}
+
+.navbar .dropdown-menu {
+    border-radius: 10px;
+    max-height: 300px; /* make dropdown scrollable */
+    overflow-y: auto;
+    z-index: 1050; /* ensure dropdown is above sticky cart summary */
+}
+
+/* Optional: scrollbar styling for dropdowns */
+.navbar .dropdown-menu::-webkit-scrollbar {
+    width: 6px;
+}
+.navbar .dropdown-menu::-webkit-scrollbar-thumb {
+    background-color: rgba(163, 72, 90, 0.7);
+    border-radius: 3px;
+}
+
+/* Currency Dropdown (Navbar) */
+.navbar .currency-dropdown .btn {
+    background-color: transparent;
+    color: #5a0f1a;
+    border: 1px solid #5a0f1a;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 5px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.3s ease;
+}
+
+.navbar .currency-dropdown .btn:hover {
+    background-color: #a3485a;
+    color: #fff;
+    border-color: #a3485a;
+}
+
+.navbar .currency-dropdown .dropdown-menu {
+    border-radius: 12px;
+    min-width: 100px;
+    border: 1px solid #5a0f1a;
+}
+
+.navbar .currency-dropdown .dropdown-item {
+    color: #5a0f1a;
+    font-weight: 600;
+}
+
+.navbar .currency-dropdown .dropdown-item.active,
+.navbar .currency-dropdown .dropdown-item:hover {
+    background-color: #a3485a;
+    color: #fff;
+}
+
+/* Cart Section */
+.cart-section {
+    padding: 50px 0;
+}
+
+.cart-title {
+    color: #f0d7b5;
+    font-weight: 700;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* Cart Items */
+.cart-item {
+    background-color: #fffaf3;
+    border-radius: 20px;
+    padding: 20px;
+    color: #5a0f1a;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cart-item .cart-details h5 {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.cart-item .cart-price {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.qty-controls .btn {
+    background-color: #a3485a;
+    color: #fff;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+}
+
+.qty-controls .btn:hover {
+    background-color: #701c2a;
+}
+
+.qty-input {
+    width: 50px;
+}
+
+.total-price {
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+/* Checkout Button */
+.btn-checkout {
+    background-color: #a3485a;
+    color: #fff;
+    border-radius: 30px;
+    padding: 10px 25px;
+    font-weight: 600;
+    border: none;
+    transition: 0.3s ease;
+}
+
+.btn-checkout:hover {
+    background-color: #701c2a;
+}
+
+/* Remove Button */
+.btn-remove {
+    background-color: #a3485a;
+    color: #fff;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.btn-remove:hover {
+    background-color: #701c2a;
+}
+
+/* Cart Summary */
+.cart-summary {
+    background-color: #fffaf3;
+    border-radius: 20px;
+    padding: 20px;
+    color: #5a0f1a;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .navbar {
+        padding: 10px 16px;
+    }
+    .nav-links-container {
+        gap: 12px;
+    }
+    .cart-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .cart-item .cart-details {
+        margin-top: 10px;
+    }
+}
+
+.no-perfumes {
+    color: #f0d7b5 !important;
+}
+
+#checkoutSelected:disabled {
+    background-color: #ccc !important;
+    border-color: #ccc !important;
+    cursor: not-allowed;
+}

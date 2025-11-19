@@ -1,0 +1,119 @@
+/* General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(120deg, #5a0f1a, #842A3B);
+    color: #333;
+    min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+    background-color: #eacb99 !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 50px;
+}
+.navbar .navbar-brand { 
+    color: #5a0f1a !important; 
+    font-weight: 700; 
+    font-size: 1.6rem; 
+}
+.navbar .nav-links-container { 
+    display: flex; 
+    flex: 1; 
+    justify-content: center; 
+    gap: 40px; 
+}
+.navbar .nav-link { 
+    color: #5a0f1a !important; 
+    font-weight: 600; 
+}
+.navbar .nav-link:hover { 
+    color: #842A3B !important; 
+}
+.icons-container { 
+    display: flex; 
+    align-items: center; 
+    gap: 15px; 
+}
+.fa-user, .fa-shopping-cart { 
+    font-size: 1.3rem; 
+    color: #5a0f1a; 
+    cursor: pointer; 
+}
+
+/* Rating Card */
+.rating-card {
+    background-color: #fffaf3;
+    border-radius: 20px;
+    padding: 30px;
+    color: #5a0f1a;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    max-width: 650px;
+    margin: 40px auto;
+}
+
+/* Messages inside card */
+.message {
+    padding: 10px 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+.message.error {
+    color: #842A3B;
+    background-color: #ffeaea;
+    border: 1px solid #d08080;
+}
+.message.success {
+    color: #842A3B;
+    background-color: #f9f3e8;
+    border: 1px solid #d0b080;
+}
+
+/* Stars */
+.stars {
+    display: flex;
+    justify-content: center;
+    font-size: 2.3rem;
+    flex-direction: row-reverse;
+    gap: 5px;
+}
+.stars input[type="radio"] { 
+    display: none; 
+}
+.stars label { 
+    color: #d1b7b7; /* neutral color before hover */
+    cursor: pointer; 
+    position: relative; 
+    transition: 0.2s ease;
+}
+.stars label:before { 
+    content: "\f005"; 
+    font-family: "Font Awesome 5 Free"; 
+    font-weight: 900; 
+}
+/* Hover + Checked */
+.stars label:hover,
+.stars label:hover ~ label,
+.stars input[type="radio"]:checked ~ label {
+    color: #f4c150; /* gold */
+}
+
+/* Button */
+.submit-btn {
+    background-color: #842A3B;
+    color: #fff;
+    border-radius: 30px;
+    padding: 10px 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s ease;
+    border: none;
+}
+.submit-btn:hover { 
+    background-color: #5a0f1a; 
+}
