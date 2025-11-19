@@ -15,9 +15,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
   try {
     for ($i = 0; $i < $count; $i++) {
-      $conn->query("UPDATE perfume_volume 
-                  selling_price = $sellingPrices[$i]
-                  WHERE perfume_volume_ID = '$perfumeVolumeIDs[$i]'");
+      $price = (float)$sellingPrices[$i];
+      $pvID  = $conn->real_escape_string($perfumeVolumeIDs[$i]);
+
+      $sql = "UPDATE perfume_volume 
+              SET selling_price = $price
+              WHERE perfume_volume_ID = '$pvID'";
+
+      if (!$conn->query($sql)) {
+        throw new Exception("SQL Error: " . $conn->error);
+      }
     }
     $conn->query("COMMIT");
     $message = "Successfully updated selling price(s).";
