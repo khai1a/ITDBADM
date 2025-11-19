@@ -16,12 +16,13 @@ if (!in_array($filterStatus, $validStatuses)) {
 }
 
 $returnsResult = $conn->query("
- SELECT CONCAT(p.perfume_name, ' ', pv.volume, 'ml') AS order_item, r.return_ID, r.customer_ID, r.quantity, r.status, r.refund_amount, r.date_requested, r.last_update
+ SELECT CONCAT(p.perfume_name, ' ', pv.volume, 'ml') AS order_item, r.return_ID, r.customer_ID, r.quantity, r.status, r.refund_amount, r.date_requested, r.last_update, c.currency_sign
     FROM returns r
 		JOIN order_details od ON od.order_detail_ID = r.order_detail_ID
 		JOIN perfume_volume pv ON pv.perfume_volume_ID = od.perfume_volume_ID
 		JOIN perfumes p ON p.perfume_ID = pv.perfume_ID
 		JOIN orders o ON o.order_ID = od.order_ID
+        JOIN currencies c ON c.currency = o.currency
     WHERE r.status = '$filterStatus' AND o.order_type = 'Online'
     ORDER BY r.date_requested DESC
 ");
@@ -145,7 +146,7 @@ $returnsResult = $conn->query("
                                 <?= htmlspecialchars($row['status']) ?>
                             </span>
                         </td>
-                        <td><?= htmlspecialchars($row['refund_amount']) ?></td>
+                        <td><?= htmlspecialchars($row['currency_sign']) . htmlspecialchars($row['refund_amount']) ?></td>
                         <td><?= htmlspecialchars($row['date_requested']) ?></td>
                         <td>
                             <?php if ($row['status'] === 'Requested'): ?>
