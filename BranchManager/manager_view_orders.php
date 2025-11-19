@@ -4,7 +4,7 @@ ini_set('display_errors', 1);
 session_start();
 include('../db_connect.php');
 
-// block access if not logged in as an employee
+// block access if not logged in as an manager
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Branch Manager') {
     header("Location: ../login_staff-admin.php");
     exit();
@@ -90,8 +90,9 @@ $orders = array_values($orders);
     <a href="manager_orders.php">Walk-In Orders</a>
     <a href="manager_returns.php">Returns</a>
     <a href="manager_view_orders.php">View Orders</a>
-    <a href="sales_management.php">Sales Management</a> <!-- change to file name -->
+    <a href="sales_management.php">Sales Management</a> 
     <a href="staff_management.php">Staff Management</a>
+    <a href="reset_password_manager.php">Reset Password</a>
   </div>
 </div>
 
