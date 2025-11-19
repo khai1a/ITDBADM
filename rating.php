@@ -11,17 +11,17 @@ if (!$customer_ID) {
 $errors = [];
 $success = "";
 
-/* Load perfumes */
+//load perfumes
 $sqlPerfumes = "SELECT perfume_ID, perfume_name FROM perfumes ORDER BY perfume_name";
 $perfumeList = $conn->query($sqlPerfumes);
 
-/* Handle form submission */
+//form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_rating'])) {
     $perfume_ID = $_POST['perfume_ID'] ?? null;
     $rating = $_POST['rating'] ?? null;
     $review_comment = trim($_POST['message'] ?? '');
 
-    // Validation
+    //validation
     if (!$perfume_ID) $errors[] = "Please select a perfume.";
     if (empty($rating)) {
         $errors[] = "Please provide a rating.";
@@ -29,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_rating'])) {
         $errors[] = "Rating must be a whole number between 1 and 5.";
     }
 
-    // Insert review if no errors
+    //insert review to db
     if (empty($errors)) {
         $last_sql = "SELECT review_ID FROM reviews ORDER BY review_ID DESC LIMIT 1";
         $last_res = $conn->query($last_sql);
@@ -44,7 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_rating'])) {
 
         if ($insert->execute()) {
             $success = "Thank you for your review!";
-            // Redirect to avoid resubmission on reload
             $_SESSION['success_message'] = $success;
             header("Location: rating.php");
             exit();
@@ -55,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_rating'])) {
     }
 }
 
-// Load success message from session after redirect
+//load success
 if (isset($_SESSION['success_message'])) {
     $success = $_SESSION['success_message'];
     unset($_SESSION['success_message']);
@@ -82,7 +81,6 @@ if (isset($_SESSION['success_message'])) {
         </button>
 
         <div class="collapse navbar-collapse" id="navbarNav">
-            <!-- Nav links container: flex-grow to fill space -->
             <div class="nav-links-container mx-auto">
                 <a class="nav-link" href="customer_home.php">Home</a>
                 <a class="nav-link" href="about_us.php">About Us</a>
@@ -176,3 +174,4 @@ if (isset($_SESSION['success_message'])) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
