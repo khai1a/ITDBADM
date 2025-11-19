@@ -68,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['orderID'])) {
             od.order_detail_ID,
             p.perfume_name,
             od.perfume_volume_ID,
+            pv.volume AS volume_ml,
             od.quantity AS qty_ordered,
             od.unit_price,
             od.currency,
@@ -195,7 +196,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['orderID'])) {
             ?>
             <tr>
               <td><?= htmlspecialchars($d['perfume_name']) ?></td>
-              <td><?= htmlspecialchars($d['perfume_volume_ID']) ?></td>
+              <td><?= htmlspecialchars($d['volume_ml']) ?> ml</td>
               <td><?= (int)$d['qty_ordered'] ?></td>
               <td><?= (int)$d['qty_returned'] ?></td>
               <td><?= htmlspecialchars($currency_sign), number_format($d['unit_price'], 2) ?></td>
