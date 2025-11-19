@@ -12,21 +12,17 @@ if (!$customerID) {
 if (isset($_GET['currency'])) {
     $_SESSION['currency'] = $_GET['currency'];
 }
-
-// USD default
 if (!isset($_SESSION['currency'])) {
     $_SESSION['currency'] = 'USD';
 }
-
 $filter_currency = $_SESSION['currency'];
 
-// cart requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $action = $_POST['action'];
     $cartItemID = $_POST['cart_item_ID'] ?? '';
     $quantity = $_POST['quantity'] ?? 1;
 
-    // cart ID
+    // Get cart ID for this customer
     $cartRes = $conn->prepare("SELECT cart_ID FROM cart WHERE customer_ID = ?");
     $cartRes->bind_param("s", $customerID);
     $cartRes->execute();
@@ -61,18 +57,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 
 // cart items
 $cartRes = $conn->prepare("
-    SELECT ci.cart_item_ID, pv.perfume_ID, pv.volume, pv.selling_price, p.perfume_name, ci.quantity
+    SELECT ci.cart_item_ID, pv.perfume_ID, pv.volume, pv.selling_price, p.perfume_name, ci.quantity,
+           COALESCE(i.quantity,0) AS total_stock
     FROM cart_items ci
     JOIN perfume_volume pv ON ci.perfume_volume_ID = pv.perfume_volume_ID
     JOIN perfumes p ON pv.perfume_ID = p.perfume_ID
     JOIN cart c ON ci.cart_ID = c.cart_ID
+    LEFT JOIN inventory i ON pv.perfume_volume_ID = i.perfume_volume_ID
     WHERE c.customer_ID = ?
 ");
 $cartRes->bind_param("s", $customerID);
 $cartRes->execute();
 $cartItems = $cartRes->get_result();
 
-// currency conversion
+// conversion
 $curStmt = $conn->prepare("SELECT fromUSD, currency_sign FROM currencies WHERE currency = ?");
 $curStmt->bind_param('s', $filter_currency);
 $curStmt->execute();
@@ -106,25 +104,23 @@ $currencySign = $currencyData['currency_sign'] ?? '$';
             <a class="nav-link" href="rating.php">Rate Us</a>
         </div>
 
-        <!-- Icons container -->
-            <div class="icons-container">
-                <!-- User Dropdown -->
-                <div class="dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                        <i class="fa fa-user"></i>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                        <li><a class="dropdown-item" href="profile.php">My Profile</a></li>
-                        <li><a class="dropdown-item" href="orders.php">My Orders</a></li>
-                        <li><a class="dropdown-item" href="points.php">My Points</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="login_customer.php">Log Out</a></li>
-                    </ul>
-                </div>
-
-                <a class="nav-link" href="cart.php">
-                    <i class="fa fa-shopping-cart"></i>
+        <div class="icons-container">
+            <div class="dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                    <i class="fa fa-user"></i>
                 </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    <li><a class="dropdown-item" href="profile.php">My Profile</a></li>
+                    <li><a class="dropdown-item" href="orders.php">My Orders</a></li>
+                    <li><a class="dropdown-item" href="points.php">My Points</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="login_customer.php">Log Out</a></li>
+                </ul>
+            </div>
+
+            <a class="nav-link" href="cart.php">
+                <i class="fa fa-shopping-cart"></i>
+            </a>
 
             <!-- currency -->
             <div class="dropdown currency-dropdown">
@@ -143,13 +139,12 @@ $currencySign = $currencyData['currency_sign'] ?? '$';
                     <?php endwhile; ?>
                 </ul>
             </div>
-
         </div>
     </div>
 </div>
 </nav>
 
-<!-- cart -->
+<!-- cart  -->
 <section class="cart-section py-5">
     <div class="container">
         <h2 class="cart-title text-center mb-4">Your Shopping Cart</h2>
@@ -161,7 +156,9 @@ $currencySign = $currencyData['currency_sign'] ?? '$';
                         <?php while($item = $cartItems->fetch_assoc()):
                             $convertedPrice = $item['selling_price'] * $currencyRate;
                         ?>
-                        <div class="cart-item p-3 mb-3 d-flex align-items-center" data-cart-item-id="<?= $item['cart_item_ID'] ?>">
+                        <div class="cart-item p-3 mb-3 d-flex align-items-center" 
+                             data-cart-item-id="<?= $item['cart_item_ID'] ?>" 
+                             data-stock="<?= $item['total_stock'] ?>">
                             <div class="cart-details flex-grow-1">
                                 <h5><?= htmlspecialchars($item['perfume_name']) ?> (<?= htmlspecialchars($item['volume']) ?>ml)</h5>
                                 <p class="cart-price" data-usd="<?= $item['selling_price'] ?>">
@@ -176,7 +173,6 @@ $currencySign = $currencyData['currency_sign'] ?? '$';
                             </div>
                             <button type="button" class="btn btn-remove ms-3"><i class="fa fa-trash"></i></button>
 
-                            <!-- for checkout -->
                             <input type="hidden" name="items[]" value="<?= $item['cart_item_ID'] ?>">
                             <input type="hidden" name="qtys[]" value="<?= $item['quantity'] ?>" class="hidden-qty">
                         </div>
@@ -204,27 +200,43 @@ $currencySign = $currencyData['currency_sign'] ?? '$';
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// calculation ng qty and total
+// Quantity update & subtotal calculation with inventory limit
 document.querySelectorAll('.cart-item').forEach(item => {
     const qtyInput = item.querySelector('.qty-input');
     const totalEl = item.querySelector('.total-price');
     const hiddenQty = item.querySelector('.hidden-qty');
     const usdPrice = parseFloat(item.querySelector('.cart-price').dataset.usd);
     const convertedPrice = usdPrice * <?= $currencyRate ?>;
+    const maxStock = parseInt(item.dataset.stock) || 9999;
 
-    const updateQty = () => {
-        let qty = Math.max(1, parseInt(qtyInput.value) || 1);
+    const minusBtn = item.querySelector('.minus-btn');
+    const plusBtn = item.querySelector('.plus-btn');
+
+    const updateQty = (delta = 0) => {
+        let qty = parseInt(qtyInput.value) || 1;
+        qty += delta;
+        if (qty < 1) qty = 1;
+        if (qty > maxStock) qty = maxStock;
+
         qtyInput.value = qty;
         hiddenQty.value = qty;
         totalEl.textContent = `Total: <?= $currencySign ?>${(convertedPrice * qty).toFixed(2)}`;
+
+        minusBtn.disabled = qty <= 1;
+        plusBtn.disabled = qty >= maxStock;
+
         updateSubtotal();
     };
 
-    item.querySelector('.minus-btn').addEventListener('click', () => { qtyInput.value = parseInt(qtyInput.value)-1; updateQty(); });
-    item.querySelector('.plus-btn').addEventListener('click', () => { qtyInput.value = parseInt(qtyInput.value)+1; updateQty(); });
-    qtyInput.addEventListener('input', updateQty);
+    minusBtn.addEventListener('click', () => updateQty(-1));
+    plusBtn.addEventListener('click', () => updateQty(1));
+    qtyInput.addEventListener('input', () => updateQty(0));
 
-    // remove item
+    qtyInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); qtyInput.blur(); }
+    });
+
+    // Remove item
     item.querySelector('.btn-remove').addEventListener('click', () => {
         const cartItemID = item.getAttribute('data-cart-item-id');
         fetch('cart.php', {
@@ -242,7 +254,6 @@ document.querySelectorAll('.cart-item').forEach(item => {
     });
 });
 
-// subtotal
 function updateSubtotal() {
     let subtotal = 0;
     document.querySelectorAll('.cart-item').forEach(item => {
