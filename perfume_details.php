@@ -15,7 +15,7 @@ if ($customerID) {
     $stmt->close();
 }
 
-// --- Currency setup ---
+// currency logic
 $filter_currency = $_GET['currency'] ?? 'USD';
 $currencyRate = 1.0;
 $currencySign = '$';
@@ -234,4 +234,5 @@ document.getElementById('addToCartBtn')?.addEventListener('click', () => {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
 
