@@ -13,12 +13,26 @@ if ($customerID !== null) {
     $stmt->close();
 }
 
+// inventory
+$inventoryTotals = [];
+$invRes = $conn->query("SELECT perfume_volume_ID, SUM(quantity) as total_qty FROM inventory GROUP BY perfume_volume_ID");
+while ($row = $invRes->fetch_assoc()) {
+    $inventoryTotals[$row['perfume_volume_ID']] = intval($row['total_qty']);
+}
+
 // add to cart
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_to_cart') {
     $perfumeVolID = $_POST['perfume_volume_ID'] ?? '';
     $quantity = intval($_POST['quantity'] ?? 1);
 
     if ($customerID && $perfumeVolID) {
+        // check stock
+        $stock = intval($inventoryTotals[$perfumeVolID] ?? 0);
+        if ($quantity > $stock) {
+            echo json_encode(['status'=>'error','message'=>"Cannot add more than available stock ($stock)."]);
+            exit;
+        }
+
         // get/create cart
         $cartStmt = $conn->prepare("SELECT cart_ID FROM cart WHERE customer_ID = ?");
         $cartStmt->bind_param("s", $customerID);
@@ -36,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         }
         $cartStmt->close();
 
-        // add to cart
+        // cart item ID
         $cartItemCount = $conn->query("SELECT COUNT(*) as c FROM cart_items")->fetch_assoc()['c'];
         $cartItemID = 'CI' . str_pad($cartItemCount + 1, 6, '0', STR_PAD_LEFT);
         $insItem = $conn->prepare("INSERT INTO cart_items (cart_item_ID, cart_ID, perfume_volume_ID, quantity) VALUES (?, ?, ?, ?)");
@@ -77,13 +91,6 @@ if ($curRes && $curRes->num_rows > 0) {
 }
 $curStmt->close();
 
-// inventory
-$inventoryTotals = [];
-$invRes = $conn->query("SELECT perfume_volume_ID, SUM(quantity) as total_qty FROM inventory GROUP BY perfume_volume_ID");
-while ($row = $invRes->fetch_assoc()) {
-    $inventoryTotals[$row['perfume_volume_ID']] = intval($row['total_qty']);
-}
-
 $where = "1=1";
 $params = [];
 $types = '';
@@ -115,7 +122,7 @@ switch ($sort) {
     case "price_high": $sortSQL = "pv.selling_price DESC"; break;
 }
 
-// total products
+// total perfumes
 $countSQL = "SELECT COUNT(*) as total
 FROM perfumes p
 JOIN brands b ON p.brand_ID = b.brand_ID
@@ -180,20 +187,19 @@ $countryList = $conn->query("SELECT country_ID, country_name FROM countries ORDE
         </div>
 
         <div class="icons-container">
-                <div class="dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
-                        <i class="fa fa-user"></i>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                        <li><a class="dropdown-item" href="profile.php">My Profile</a></li>
-                        <li><a class="dropdown-item" href="orders.php">My Orders</a></li>
-                        <li><a class="dropdown-item" href="points.php">My Points</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="login_customer.php">Log Out</a></li>
-                    </ul>
-                </div>
+            <div class="dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                    <i class="fa fa-user"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                    <li><a class="dropdown-item" href="profile.php">My Profile</a></li>
+                    <li><a class="dropdown-item" href="orders.php">My Orders</a></li>
+                    <li><a class="dropdown-item" href="points.php">My Points</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="login_customer.php">Log Out</a></li>
+                </ul>
+            </div>
 
-        <div class="icons-container">
             <a class="nav-link me-3" href="cart.php"><i class="fa fa-cart-shopping"></i></a>
 
             <!-- currency -->
@@ -213,13 +219,12 @@ $countryList = $conn->query("SELECT country_ID, country_name FROM countries ORDE
                     <?php endwhile; ?>
                 </ul>
             </div>
-
         </div>
     </div>
 </div>
 </nav>
 
-<!-- filters tas catalog -->
+<!-- filters and catalog -->
 <div class="container mt-4">
 <h2 class="fw-bold">All Perfumes</h2>
 <?php
@@ -292,85 +297,70 @@ if ($sort !== "name_asc") $activeFilters[] = "Sort: <strong>{$sortLabels[$sort]}
         </form>
     </div>
 
-    <!-- perfumes -->
-    <div class="col-md-9">
-        <div class="row g-4" id="perfumeCatalog">
-            <?php if ($products && $products->num_rows > 0): ?>
-                <?php while($prod = $products->fetch_assoc()): 
-                    $isRestricted = false;
-                    if ($prod['is_exclusive'] == 1 && !empty($prod['country_ID']) && $customerCountry !== null && $prod['country_ID'] != $customerCountry)
-                        $isRestricted = true;
-
-                    $totalStock = $inventoryTotals[$prod['perfume_volume_ID']] ?? 0;
-                    $soldOut = $totalStock == 0;
-
-                    $convertedPrice = floatval($prod['selling_price']) * $currencyRate;
-                    $unitPriceUsd = floatval($prod['selling_price']);
-                ?>
-                <div class="col-md-4">
-                    <div class="product-card p-3 position-relative">
-                        <input type="checkbox" class="checkout_selected mb-2" value="<?= htmlspecialchars($prod['perfume_volume_ID']) ?>">
-                        <a href="perfume_details.php?perfume_volume_ID=<?= htmlspecialchars($prod['perfume_volume_ID']) ?>" class="text-decoration-none text-dark">
-                            <img src="images/<?= htmlspecialchars($prod['image_name']) ?>" class="card-img-top" alt="<?= htmlspecialchars($prod['perfume_name']) ?>">
-                            <h5 class="mt-2"><?= htmlspecialchars($prod['perfume_name']) ?></h5>
-                            <p class="text-muted"><?= htmlspecialchars($prod['brand_name']) ?></p>
-                        </a>
-                        <?php if (!empty($prod['country_name'])): ?>
-                            <p class="country-label badge bg-info mb-2"><?= htmlspecialchars($prod['country_name']) ?></p>
-                        <?php endif; ?>
-
-                        <p class="price"
-                           data-usd="<?= htmlspecialchars(number_format($unitPriceUsd, 2, '.', '')) ?>"
-                           data-rate="<?= htmlspecialchars(number_format($currencyRate, 6, '.', '')) ?>"
-                           data-sign="<?= htmlspecialchars($currencySign) ?>">
-                            <?= htmlspecialchars($currencySign) . number_format($convertedPrice, 2) ?>
-                        </p>
-
-                        <?php if ($isRestricted): ?>
-                            <p class="badge bg-danger text-white text-center mb-2">Not for Sale</p>
-                        <?php elseif ($soldOut): ?>
-                            <p class="badge bg-danger text-white text-center mb-2">Sold Out</p>
-                        <?php else: ?>
-                            <form class="add-to-cart-form">
-                                <input type="hidden" name="perfume_volume_ID" value="<?= htmlspecialchars($prod['perfume_volume_ID']) ?>">
-                                <input type="hidden" name="quantity" class="qty-input-hidden" value="1">
-
-                                <div class="quantity d-flex justify-content-center align-items-center mb-2">
-                                    <button type="button" class="btn qty-btn minus-btn">-</button>
-                                    <input type="number" value="1" min="1" class="form-control mx-2 text-center qty-input">
-                                    <button type="button" class="btn qty-btn plus-btn">+</button>
-                                </div>
-
-                                <p class="total-price text-center mb-2">Total: <?= htmlspecialchars($currencySign) . number_format($convertedPrice, 2) ?></p>
-                                <button type="button" class="btn btn-buy w-100 add-to-cart-btn">Add to Cart</button>
-                            </form>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <?php endwhile; ?>
-            <?php else: ?>
-                <div class="col-12">
-                    <p class="text-center fs-5 mt-4 no-perfumes"><b>No perfumes found.</b></p>
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <!-- Pagination -->
+<!-- perfumes -->
+<div class="col-md-9">
+    <div class="row g-4" id="perfumeCatalog">
         <?php if ($products && $products->num_rows > 0): ?>
-        <nav class="mt-4">
-            <ul class="pagination justify-content-center">
-                <?php for($i=1;$i<=$pages;$i++): ?>
-                    <li class="page-item <?= $i==$page?'active':'' ?>">
-                        <a class="page-link" href="?brand=<?= urlencode($filter_brand) ?>&gender=<?= urlencode($filter_gender) ?>&country=<?= urlencode($filter_country) ?>&sort=<?= urlencode($sort) ?>&currency=<?= urlencode($filter_currency) ?>&page=<?= $i ?>"><?= $i ?></a>
-                    </li>
-                <?php endfor; ?>
-            </ul>
-        </nav>
+            <?php while($prod = $products->fetch_assoc()): 
+                $isRestricted = false;
+                if ($prod['is_exclusive'] == 1 && !empty($prod['country_ID']) && $customerCountry !== null && $prod['country_ID'] != $customerCountry)
+                    $isRestricted = true;
+
+                $totalStock = $inventoryTotals[$prod['perfume_volume_ID']] ?? 0;
+                $soldOut = $totalStock == 0;
+
+                $convertedPrice = floatval($prod['selling_price']) * $currencyRate;
+                $unitPriceUsd = floatval($prod['selling_price']);
+            ?>
+            <div class="col-md-4">
+                <div class="product-card p-3 position-relative">
+                    <input type="checkbox" class="checkout_selected mb-2" value="<?= htmlspecialchars($prod['perfume_volume_ID']) ?>">
+                    <a href="perfume_details.php?perfume_volume_ID=<?= htmlspecialchars($prod['perfume_volume_ID']) ?>" class="text-decoration-none text-dark">
+                        <img src="images/<?= htmlspecialchars($prod['image_name']) ?>" class="card-img-top" alt="<?= htmlspecialchars($prod['perfume_name']) ?>">
+                        <h5 class="mt-2"><?= htmlspecialchars($prod['perfume_name']) ?></h5>
+                        <p class="text-muted"><?= htmlspecialchars($prod['brand_name']) ?></p>
+                    </a>
+                    <?php if (!empty($prod['country_name'])): ?>
+                        <p class="country-label badge bg-info mb-2"><?= htmlspecialchars($prod['country_name']) ?></p>
+                    <?php endif; ?>
+
+                    <p class="price"
+                       data-usd="<?= htmlspecialchars(number_format($unitPriceUsd, 2, '.', '')) ?>"
+                       data-rate="<?= htmlspecialchars(number_format($currencyRate, 6, '.', '')) ?>"
+                       data-sign="<?= htmlspecialchars($currencySign) ?>"
+                       data-stock="<?= $totalStock ?>">
+                        <?= htmlspecialchars($currencySign) . number_format($convertedPrice, 2) ?>
+                    </p>
+
+                    <?php if ($isRestricted): ?>
+                        <p class="badge bg-danger text-white text-center mb-2">Not for Sale</p>
+                    <?php elseif ($soldOut): ?>
+                        <p class="badge bg-danger text-white text-center mb-2">Sold Out</p>
+                    <?php else: ?>
+                        <form class="add-to-cart-form">
+                            <input type="hidden" name="perfume_volume_ID" value="<?= htmlspecialchars($prod['perfume_volume_ID']) ?>">
+                            <input type="hidden" name="quantity" class="qty-input-hidden" value="1">
+
+                            <div class="quantity d-flex justify-content-center align-items-center mb-2">
+                                <button type="button" class="btn qty-btn minus-btn">-</button>
+                                <input type="number" value="1" min="1" class="form-control mx-2 text-center qty-input">
+                                <button type="button" class="btn qty-btn plus-btn">+</button>
+                            </div>
+
+                            <p class="total-price text-center mb-2">Total: <?= htmlspecialchars($currencySign) . number_format($convertedPrice, 2) ?></p>
+                            <button type="button" class="btn btn-buy w-100 add-to-cart-btn">Add to Cart</button>
+                        </form>
+                    <?php endif; ?>
+                </div>
+            </div>
+            <?php endwhile; ?>
+        <?php else: ?>
+            <div class="col-12">
+                <p class="text-center fs-5 mt-4 no-perfumes"><b>No perfumes found.</b></p>
+            </div>
         <?php endif; ?>
     </div>
 </div>
-</div>
-</section>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
@@ -378,25 +368,44 @@ if ($sort !== "name_asc") $activeFilters[] = "Sort: <strong>{$sortLabels[$sort]}
 document.querySelectorAll('.product-card').forEach(card => {
     const qtyInput = card.querySelector('.qty-input');
     const hiddenQty = card.querySelector('.qty-input-hidden');
-    if (!qtyInput || !hiddenQty) return;
+    const totalPriceEl = card.querySelector('.total-price');
+    if (!qtyInput || !hiddenQty || !totalPriceEl) return;
+
     const minusBtn = card.querySelector('.minus-btn');
     const plusBtn = card.querySelector('.plus-btn');
-    const totalPriceEl = card.querySelector('.total-price');
-    const unitPriceUSD = parseFloat(card.querySelector('.price').dataset.usd);
-    const currencyRate = parseFloat(card.querySelector('.price').dataset.rate);
-    const currencySign = card.querySelector('.price').dataset.sign;
+    const priceEl = card.querySelector('.price');
+    const unitPriceUSD = parseFloat(priceEl.dataset.usd);
+    const currencyRate = parseFloat(priceEl.dataset.rate);
+    const currencySign = priceEl.dataset.sign;
+    const maxStock = Math.min(parseInt(priceEl.dataset.stock), 9999);
+
+    qtyInput.max = maxStock;
 
     const updateQty = () => {
         let qty = parseInt(qtyInput.value) || 1;
         if (qty < 1) qty = 1;
+        if (qty > maxStock) qty = maxStock;
         qtyInput.value = qty;
         hiddenQty.value = qty;
-        if (totalPriceEl) totalPriceEl.textContent = `Total: ${currencySign}${(unitPriceUSD * currencyRate * qty).toFixed(2)}`;
+        totalPriceEl.textContent = `Total: ${currencySign}${(unitPriceUSD * currencyRate * qty).toFixed(2)}`;
+
+        minusBtn.disabled = qty <= 1;
+        plusBtn.disabled = qty >= maxStock;
     };
 
-    minusBtn.addEventListener('click', () => { qtyInput.value = parseInt(qtyInput.value)-1; updateQty(); });
-    plusBtn.addEventListener('click', () => { qtyInput.value = parseInt(qtyInput.value)+1; updateQty(); });
+    minusBtn.addEventListener('click', () => {
+        qtyInput.stepDown();
+        updateQty();
+    });
+
+    plusBtn.addEventListener('click', () => {
+        qtyInput.stepUp();
+        updateQty();
+    });
+
     qtyInput.addEventListener('input', updateQty);
+
+    updateQty();
 });
 
 // add to cart
@@ -404,7 +413,13 @@ document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
     btn.addEventListener('click', function() {
         const form = btn.closest('.add-to-cart-form');
         const perfumeVolID = form.querySelector('[name="perfume_volume_ID"]').value;
-        const quantity = form.querySelector('[name="quantity"]').value;
+        const quantity = parseInt(form.querySelector('[name="quantity"]').value);
+        const maxStock = parseInt(form.closest('.product-card').querySelector('.price').dataset.stock);
+
+        if (quantity > maxStock) {
+            alert(`Cannot add more than ${maxStock} item(s) to cart.`);
+            return;
+        }
 
         fetch('buy_here.php', {
             method: 'POST',
@@ -425,8 +440,15 @@ document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
         });
     });
 });
+
+document.querySelectorAll('.qty-input').forEach(input => {
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            input.blur();
+        }
+    });
+});
 </script>
-
 </body>
-
 </html>
