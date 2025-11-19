@@ -1,0 +1,197 @@
+/* General Styles */
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(120deg, #5a0f1a, #842A3B);
+    color: #5a0f1a;
+    min-height: 100vh;
+}
+
+/* Navbar */
+.navbar {
+    background-color: #eacb99 !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 50px; /* taller navbar */
+}
+
+.navbar .navbar-brand {
+    color: #5a0f1a !important;
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.navbar .nav-links-container {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    gap: 40px;
+}
+
+.navbar .nav-link {
+    color: #5a0f1a !important;
+    font-weight: 600;
+    text-align: center;
+}
+
+.navbar .nav-link:hover {
+    color: #a3485a !important;
+}
+
+/* User & Cart Icons */
+.navbar .icons-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.navbar .fa-user, .navbar .fa-cart-shopping {
+    font-size: 1.3rem;
+    color: #5a0f1a;
+    cursor: pointer;
+}
+
+.navbar .dropdown-menu {
+    border-radius: 10px;
+}
+
+/* Currency Dropdown (Navbar) */
+.navbar .currency-dropdown .btn {
+    background-color: transparent;
+    color: #5a0f1a !important;
+    border: 1px solid #5a0f1a !important;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 5px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.3s ease;
+}
+
+.navbar .currency-dropdown .btn:hover {
+    background-color: #a3485a;
+    color: #fff;
+    border-color: #a3485a;
+}
+
+.navbar .currency-dropdown .dropdown-menu {
+    border-radius: 12px;
+    min-width: 100px;
+    border: 1px solid #5a0f1a;
+}
+
+.navbar .currency-dropdown .dropdown-item {
+    color: #5a0f1a;
+    font-weight: 600;
+}
+
+.navbar .currency-dropdown .dropdown-item.active,
+.navbar .currency-dropdown .dropdown-item:hover {
+    background-color: #a3485a;
+    color: #fff;
+}
+
+/* Perfume Details Card */
+.details-card {
+    background-color: #fffaf3;
+    border-radius: 25px;
+    padding: 40px;
+    color: #5a0f1a;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.details-card img {
+    width: 100%;
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+.details-card h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: #a3485a;
+}
+
+.details-card p {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+/* Quantity Controls */
+.qty-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.qty-controls button {
+    width: 45px;
+    height: 45px;
+    font-size: 1.5rem;
+    border-radius: 50%;
+    background-color: #a3485a;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+.qty-controls button:hover {
+    background-color: #701c2a;
+}
+
+#qtyInput {
+    width: 70px;
+    text-align: center;
+    font-size: 1.1rem;
+    padding: 5px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+}
+
+/* Add to Cart Button */
+#addToCartBtn {
+    background-color: #a3485a;
+    color: #fff;
+    border-radius: 30px;
+    font-weight: 600;
+    padding: 12px 35px;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+#addToCartBtn:hover {
+    background-color: #701c2a;
+}
+
+/* Responsive Layout */
+@media (min-width: 992px) {
+    .details-card .row > div:first-child {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+    .details-card .row > div:last-child {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+
+/* Back to Catalogue Button */
+.btn-back {
+    background-color: #701c2a;
+    color: #fff;
+    border: none;
+    font-weight: 600;
+    padding: 10px 25px;
+    border-radius: 30px;
+    transition: 0.3s ease;
+}
+
+.btn-back:hover {
+    background-color: #a3485a;
+    color: #fff;
+}
