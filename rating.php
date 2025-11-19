@@ -71,7 +71,7 @@ if (isset($_SESSION['success_message'])) {
 </head>
 <body>
 
-<!-- Navigation Bar -->
+<!-- navbar -->
 <nav class="navbar navbar-expand-lg shadow-sm">
     <div class="container">
         <a class="navbar-brand" href="customer_home.php">Aurum Scents</a>
@@ -89,9 +89,9 @@ if (isset($_SESSION['success_message'])) {
                 <a class="nav-link active" href="rating.php">Rate Us</a>
             </div>
 
-            <!-- Icons container -->
+            <!-- icons -->
             <div class="icons-container">
-                <!-- User Dropdown -->
+                <!-- user -->
                 <div class="dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                         <i class="fa fa-user"></i>
@@ -105,7 +105,7 @@ if (isset($_SESSION['success_message'])) {
                     </ul>
                 </div>
 
-                <!-- Cart Icon -->
+                <!-- cart -->
                 <a class="nav-link" href="cart.php">
                     <i class="fa fa-shopping-cart"></i>
                 </a>
@@ -120,7 +120,7 @@ if (isset($_SESSION['success_message'])) {
         <div class="col-md-6">
             <div class="rating-card">
 
-                <!-- Messages -->
+                <!-- mssgs -->
                 <?php if ($errors): ?>
                     <?php foreach ($errors as $error): ?>
                         <div class="message error"><?= htmlspecialchars($error) ?></div>
@@ -174,4 +174,5 @@ if (isset($_SESSION['success_message'])) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
 
