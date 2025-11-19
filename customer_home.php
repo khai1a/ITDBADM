@@ -14,7 +14,7 @@ require 'db_connect.php';
 </head>
 <body>
 
-<!-- Navigation Bar -->
+<!-- navbar -->
 <nav class="navbar navbar-expand-lg shadow-sm">
     <div class="container">
         <a class="navbar-brand" href="customer_home.php">Aurum Scents</a>
@@ -54,7 +54,7 @@ require 'db_connect.php';
     </div>
 </nav>
 
-<!-- Slideshow -->
+<!-- slideshow -->
 <div id="carouselExampleIndicators" class="carousel slide mt-4" data-bs-ride="carousel">
     <div class="carousel-indicators">
         <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active"></button>
@@ -83,3 +83,4 @@ require 'db_connect.php';
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
