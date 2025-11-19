@@ -2,9 +2,7 @@
 include('../db_connect.php');
 session_start();
 
-// --------------------
-// AUTH CHECK
-// --------------------
+
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Branch Manager') {
     header("Location: ../login_staff-admin.php");
     exit;
@@ -13,9 +11,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Branch Manager') {
 $manager_username = $_SESSION['username'];
 $branchID = $_SESSION['branch_id'];
 
-// --------------------
-// FETCH STAFF USING STORED PROCEDURE
-// --------------------
+
 $stmt = $conn->prepare("CALL get_staff_by_branch(?)");
 $stmt->bind_param("s", $branchID);
 $stmt->execute();
@@ -60,7 +56,7 @@ $conn->next_result(); // free result for next queries
     <a href="manager_orders.php">Walk-In Orders</a>
     <a href="manager_returns.php">Returns</a>
     <a href="manager_view_orders.php">View Orders</a>
-    <a href="sales_management.php">Sales Management</a> <!-- change to file name -->
+    <a href="sales_management.php">Sales Management</a> 
     <a href="staff_management.php">Staff Management</a>
         </div>
     </div>
@@ -98,4 +94,5 @@ $conn->next_result(); // free result for next queries
     </div>
 </body>
 </html>
+
 
