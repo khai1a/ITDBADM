@@ -5,32 +5,30 @@ session_start();
 $message = "";
 $success = false;
 
-// Fetch countries for dropdown
+// countries dropdown from sql
 $country_result = mysqli_query($conn, "SELECT country_ID, country_name, currency FROM countries ORDER BY country_name ASC");
 
-// Pre-fill values if session exists
+
 $signup_data = $_SESSION['signup'] ?? [];
 
-// Email validation function
+// Email validation
 function validate_strict_email($email) {
     return preg_match('/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,10}$/', $email);
 }
 
-// Password validation function
+// Password validation
 function validate_password($password) {
     return preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[\W_]).{8,}$/', $password);
 }
 
-// International phone number validation (starts with + and numbers)
+// Phone number validation (caters to many countries numbers)
 function validate_phone($phone) {
     return preg_match('/^\+\d{6,15}$/', $phone);
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    /* -----------------------------------------------
-       STEP 1 — SAVE PERSONAL DATA IN SESSION
-    -------------------------------------------------*/
+
     if (isset($_POST['step']) && $_POST['step'] == 1) {
         $password = $_POST['password'];
         $confirm_password = $_POST['confirm_password'];
@@ -59,9 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    /* -----------------------------------------------
-       STEP 2 — INSERT CUSTOMER + ADDRESS
-    -------------------------------------------------*/
+ 
     if (isset($_POST['step']) && $_POST['step'] == 2) {
 
         $data = $_SESSION['signup'];
@@ -85,7 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $message = "Email or mobile number already exists!";
         } else {
 
-            /* ---- Generate customer_ID ---- */
+            
             $res = mysqli_query($conn, "SELECT customer_ID
                             FROM customers
                             ORDER BY CAST(SUBSTRING(customer_ID,3) AS UNSIGNED) DESC
@@ -100,7 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-            /* ---- Insert into customers ---- */
+            
             $insert_customer = "INSERT INTO customers 
                 (customer_ID, first_name, last_name, email, password, mobile_number, country_ID, birthday) 
                 VALUES 
@@ -108,7 +104,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             if (mysqli_query($conn, $insert_customer)) {
 
-                /* ---- Generate address_ID (AD0001...) ---- */
+               
                 $resAdd = mysqli_query($conn, "SELECT address_ID 
                                                FROM customer_addresses 
                                                ORDER BY CAST(SUBSTRING(address_ID,3) AS UNSIGNED) DESC 
@@ -121,7 +117,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $address_ID = 'AD0001';
                 }
 
-                /* ---- Insert into customer_addresses ---- */
+            
                 $insert_address = "INSERT INTO customer_addresses 
                     (address_ID, customer_ID, address_line1, address_line2, city, province, postal_code, country_ID) 
                     VALUES 
@@ -267,7 +263,6 @@ function validatePhone(p) {
     return /^\+\d{6,15}$/.test(p);
 }
 
-// Track touched fields
 let touchedStep1 = {};
 let touchedStep2 = {};
 
@@ -281,7 +276,6 @@ function getErrorMessage(f, value) {
     return '';
 }
 
-// Step 1 validation
 function checkStep1() {
     let fields = ['first_name','last_name','email','password','confirm_password','mobile_number','birthday','country_ID'];
     let btn = document.getElementById('nextBtn');
@@ -292,7 +286,7 @@ function checkStep1() {
         let msg = getErrorMessage(f, el.value);
         let errorEl = document.getElementById(f+'_error');
 
-        // Show error only if touched
+    
         if(touchedStep1[f]) {
             if(msg) {
                 el.classList.add('invalid'); el.classList.remove('valid');
@@ -304,14 +298,13 @@ function checkStep1() {
             }
         }
 
-        // Check overall validity for button (must be valid even if not touched)
         if(msg) allValid = false;
     });
 
     btn.disabled = !allValid;
 }
 
-// Step 2 validation
+
 function checkStep2() {
     let fields = ['address_line1','city','postal_code'];
     let btn = document.getElementById('signupBtn');
@@ -339,12 +332,12 @@ function checkStep2() {
     btn.disabled = !allValid;
 }
 
-// Attach Step 1 listeners
+
 document.querySelectorAll('#step1 input, #step1 select').forEach(el => {
     el.addEventListener('input', e => {
         touchedStep1[e.target.name] = true;
 
-        // Auto prepend + for phone
+    
         if(e.target.name === 'mobile_number') {
             if(e.target.value && !e.target.value.startsWith('+')) {
                 e.target.value = '+' + e.target.value.replace(/^\+*/,'');
@@ -360,7 +353,7 @@ document.querySelectorAll('#step1 input, #step1 select').forEach(el => {
     });
 });
 
-// Attach Step 2 listeners
+
 document.querySelectorAll('#step2 input').forEach(el => {
     el.addEventListener('input', e => {
         touchedStep2[e.target.name] = true;
@@ -374,3 +367,4 @@ document.querySelectorAll('#step2 input').forEach(el => {
 </script>
 </body>
 </html>
+
