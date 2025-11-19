@@ -1,8 +1,8 @@
 <?php
 session_start();
-require 'db_connect.php'; // Your database connection file
+require 'db_connect.php';
 
-// Check if user is logged in
+// check if logged-in
 if (!isset($_SESSION['customer_ID'])) {
     header("Location: login_customer.php");
     exit();
@@ -10,7 +10,7 @@ if (!isset($_SESSION['customer_ID'])) {
 
 $customer_ID = $_SESSION['customer_ID'];
 
-// Fetch user data with JOIN to countries and address table
+// join countries and customers table
 $sql = "SELECT 
             c.first_name, 
             c.last_name, 
@@ -30,7 +30,7 @@ $sql = "SELECT
         WHERE c.customer_ID = ?";
 
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $customer_ID); // VARCHAR ID, use "s"
+$stmt->bind_param("s", $customer_ID); //VARCHAR id
 $stmt->execute();
 $result = $stmt->get_result();
 $user = $result->fetch_assoc();
@@ -38,12 +38,12 @@ $user = $result->fetch_assoc();
 $stmt->close();
 $conn->close();
 
-// No user found
+// no user found
 if (!$user) {
     die("User not found.");
 }
 
-// Build full address string
+// address string
 $full_address = $user['address_line1'];
 if (!empty($user['address_line2'])) $full_address .= ', ' . $user['address_line2'];
 $full_address .= ', ' . $user['city'];
@@ -82,4 +82,5 @@ $full_address .= ' ' . $user['postal_code'];
 </div>
 </body>
 </html>
+
 
