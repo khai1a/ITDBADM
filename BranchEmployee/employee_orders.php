@@ -507,8 +507,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div id="customerInfo" class="customer-info" style="display:none;">
           <p><strong>Name:</strong> <span id="customerName"></span></p>
           <p><strong>Available Points:</strong> <span id="availablePoints" data-points="0">0 pts</span></p>
-          <label for="redeemPoints">Redeem Points:</label>
-
         <div style="display:flex; align-items:center; gap:10px; margin-top:8px;">
 
 
