@@ -53,7 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 case 'Perfumer':
                     $message = "Welcome Perfumer! Redirecting...";
                     $message_type = "success";
-                    echo "<meta http-equiv='refresh' content='2;url=perfumer_dashboard.php'>";
+                    echo "<meta http-equiv='refresh' content='2;url=Perfumers/perfumer_reports_dashboard.php'>";
                     break;
                 default:
                     $message = "Role not recognized.";
@@ -112,5 +112,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </div>
 </body>
 </html>
+
 
 
