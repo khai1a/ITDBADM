@@ -1,11 +1,9 @@
 <?php
 include('../db_connect.php');
 session_start();
-date_default_timezone_set('Asia/Manila'); // fixes "Today" showing previous day
+date_default_timezone_set('Asia/Manila');
 
-// --------------------
-// AUTH CHECK
-// --------------------
+
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Branch Manager') {
     header("Location: ../login_staff-admin.php");
     exit;
@@ -14,9 +12,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Branch Manager') {
 $manager_username = $_SESSION['username'];
 $branchID = $_SESSION['branch_id'];
 
-// --------------------
-// HANDLE FILTERS
-// --------------------
+
 $fromDate = NULL;
 $toDate = NULL;
 
@@ -41,9 +37,7 @@ if (isset($_GET['from'], $_GET['to']) && $_GET['from'] !== "" && $_GET['to'] !==
     $toDate = $_GET['to'];
 }
 
-// --------------------
-// GET BRANCH CURRENCY (PROC 1)
-// --------------------
+
 $stmtCurrency = $conn->prepare("CALL get_branch_currency(?)");
 $stmtCurrency->bind_param("s", $branchID);
 $stmtCurrency->execute();
@@ -52,40 +46,34 @@ $branchCurrency = ($resultCurrency && $row = $resultCurrency->fetch_assoc())
     ? $row['currency_sign'] 
     : '₱';
 $stmtCurrency->close();
-$conn->next_result(); // free result set so we can run next CALL
+$conn->next_result(); 
 
-// --------------------
-// FETCH WALK-IN ORDERS (PROC 2) — only this branch
-// --------------------
+
 $stmtWalk = $conn->prepare("CALL get_walkin_orders(?, ?, ?)");
 $stmtWalk->bind_param("sss", $branchID, $fromDate, $toDate);
 $stmtWalk->execute();
-$walkinOrders = $stmtWalk->get_result(); // iterate later
+$walkinOrders = $stmtWalk->get_result();
 
-// --------------------
-// FETCH ONLINE ORDERS (PROC 3) — all branches
-// --------------------
+
 $conn->next_result();
 $stmtOnline = $conn->prepare("CALL get_online_orders(?, ?)");
 $stmtOnline->bind_param("ss", $fromDate, $toDate);
 $stmtOnline->execute();
 $onlineOrders = $stmtOnline->get_result();
 
-// --------------------
-// SALES CHART DATA (PROC 4) — summarize only walk-in for this branch
-// --------------------
+
 $conn->next_result();
 $stmtChart = $conn->prepare("CALL get_walkin_sales_chart(?, ?, ?)");
 $stmtChart->bind_param("sss", $branchID, $fromDate, $toDate);
 $stmtChart->execute();
 $resChart = $stmtChart->get_result();
 
-// Prepare chart data
+
 $salesLabels = [];
 $salesTotals = [];
 $totalSalesPeriod = 0;
 
-// generate full date range for chart (only if filter provided)
+
 $dateRange = [];
 if ($fromDate && $toDate) {
     $start = new DateTime($fromDate);
@@ -93,30 +81,28 @@ if ($fromDate && $toDate) {
     $end->modify('+1 day'); // include end date
     $period = new DatePeriod($start, new DateInterval('P1D'), $end);
     foreach ($period as $date) {
-        $dateRange[$date->format('Y-m-d')] = 0; // default 0 sales for each day
+        $dateRange[$date->format('Y-m-d')] = 0; // default to zero
     }
 }
 
-// Fill dateRange with results returned
+
 while ($row = $resChart->fetch_assoc()) {
     $dateKey = $row['sales_date'];
     $dateRange[$dateKey] = floatval($row['total_amount']);
     $totalSalesPeriod += floatval($row['total_amount']);
 }
 
-// Build labels & totals arrays
+
 $salesLabels = array_keys($dateRange);
 $salesTotals = array_values($dateRange);
 
-// Close statements & free results
+
 $stmtWalk->close();
 $stmtOnline->close();
 $stmtChart->close();
 $conn->next_result();
 
-// --------------------
-// FETCH ORDER SUPPLY ASSIGNMENTS (OSA) — only for this branch
-// --------------------
+
 $sqlOSA = "
     SELECT osa.order_supply_assignment_ID, od.order_ID, pv.perfume_ID, p.perfume_name, pv.volume, osa.quantity, od.unit_price, cur.currency_sign
     FROM order_supply_assignment osa
@@ -303,4 +289,5 @@ $conn->next_result();
     </div>
 </body>
 </html>
+
 
