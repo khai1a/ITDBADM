@@ -22,8 +22,11 @@ $top_perfumes = fetchAll($conn, "
 
 // most popular accords
 $popular_accords = fetchAll($conn, "
-    SELECT a.accord_name, COUNT(*) AS use_count
-    FROM perfume_accords pa
+    SELECT a.accord_name, SUM(od.quantity) AS use_count
+    FROM order_details od
+    JOIN perfume_volume pv ON pv.perfume_volume_ID = od.perfume_volume_ID
+    JOIN perfumes p ON p.perfume_ID = pv.perfume_ID
+    JOIN perfume_accords pa ON pa.perfume_ID = p.perfume_ID
     JOIN accords a ON a.accord_ID = pa.accord_ID
     GROUP BY pa.accord_ID
     ORDER BY use_count DESC
@@ -32,19 +35,24 @@ $popular_accords = fetchAll($conn, "
 
 // most popular notes
 $popular_notes = fetchAll($conn, "
-    SELECT n.note_name, COUNT(*) AS use_count
-    FROM perfume_notes pn
+    SELECT n.note_name, SUM(od.quantity) AS use_count
+    FROM order_details od
+    JOIN perfume_volume pv ON pv.perfume_volume_ID = od.perfume_volume_ID
+    JOIN perfumes p ON p.perfume_ID = pv.perfume_ID
+    JOIN perfume_notes pn ON pn.perfume_ID = p.perfume_ID
     JOIN notes n ON n.note_ID = pn.note_ID
     GROUP BY pn.note_ID
     ORDER BY use_count DESC
     LIMIT 10;
 ");
 
-// perfume count by concentration
+// most popular concentrations
 $concentration_count = fetchAll($conn, "
-    SELECT concentration, COUNT(*) AS total
-    FROM perfumes
-    GROUP BY concentration;
+    SELECT p.concentration, SUM(od.quantity) AS total
+    FROM order_details od
+    JOIN perfume_volume pv ON pv.perfume_volume_ID = od.perfume_volume_ID
+    JOIN perfumes p ON p.perfume_ID = pv.perfume_ID
+    GROUP BY p.concentration;
 ");
 
 // Prepare JSON for Chart.js
@@ -173,7 +181,7 @@ new Chart(document.getElementById("chartAccords"), {
     data: {
         labels: accords.labels,
         datasets: [{
-            label: "Accord Usage Count",
+            label: "Accords Popularity",
             data: accords.data,
         }]
     },
@@ -190,7 +198,7 @@ new Chart(document.getElementById("chartNotes"), {
     data: {
         labels: notes.labels,
         datasets: [{
-            label: "Note Usage Count",
+            label: "Notes Popularity",
             data: notes.data,
         }]
     },
@@ -207,7 +215,7 @@ new Chart(document.getElementById("chartConcentration"), {
     data: {
         labels: conc.labels,
         datasets: [{
-            label: "Perfume Count",
+            label: "Concentration Popularity",
             data: conc.data,
         }]
     },
