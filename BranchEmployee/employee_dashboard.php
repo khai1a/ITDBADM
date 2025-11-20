@@ -172,7 +172,7 @@ $stmt->close();
   <div class="card">
     <h3>Walk-In Orders</h3>
     <p><?= $resOrders['order_count'] ?> orders today</p>
-    <p><?= htmlspecialchars($currency_sign), number_format($resOrders['total_sales'], 2) ?> total</p>
+    <p><?= htmlspecialchars($currency_sign), number_format($resOrders['total_sales'] ?? 0, 2) ?> total</p>
   </div>
 
   <div class="card">
