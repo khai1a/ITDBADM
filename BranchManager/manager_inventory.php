@@ -112,6 +112,7 @@ if ($stmt = $conn->prepare($sql)) {
     <a href="manager_view_orders.php">View Orders</a>
     <a href="sales_management.php">Sales Management</a> 
     <a href="staff_management.php">Staff Management</a>
+      <a href="reset_password_manager.php">Reset Password</a>
   </div>
 </div>
 
