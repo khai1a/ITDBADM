@@ -1,3 +1,4 @@
+
 body {
   font-family: 'Poppins', sans-serif;
   margin: 0;
@@ -5,6 +6,7 @@ body {
   background: linear-gradient(120deg, #5a0f1a, #842A3B);
   color: #333;
   height: 100vh;
+  overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -18,25 +20,27 @@ body {
   height: 100%;
 }
 
+
 .login-card {
   display: flex;
-  width: 900px;
-  height: 450px;
+  width: 1000px;
+  height: 500px;
   border-radius: 20px;
   overflow: hidden;
   background-color: #fffaf3;
   box-shadow: 0 8px 30px rgba(0,0,0,0.25);
 }
 
-/* LEFT */
+
 .login-left {
   flex: 1;
-  padding: 60px;
+  padding: 40px 60px; 
   background: linear-gradient(to bottom right, #fce8cb, #f5daa7);
   display: flex;
   flex-direction: column;
   justify-content: center;
   border-right: 3px solid #eacb99;
+  align-items: center;
 }
 
 .login-left h3 {
@@ -44,17 +48,63 @@ body {
   color: #5a0f1a;
   font-weight: 600;
   font-size: 26px;
-  margin-bottom: 30px;
+  margin-bottom: 15px; 
 }
+
+/* alert */
+.alert-container {
+  height: 56px;          
+  margin-bottom: 15px;   
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;  
+}
+
+
+.login-left .form-group input,
+.login-left .btn-submit {
+  width: 380px;      
+  max-width: 400px;
+}
+
+.alert {
+  padding: 14px 18px;
+  border-radius: 14px;
+  font-size: 15px;
+  text-align: center;
+  font-weight: 600;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease;
+}
+
+.alert.success {
+  background: rgba(212, 255, 223, 0.55);
+  color: #235d31;
+  border: 1px solid #7ccf92;
+  box-shadow: 0 4px 12px rgba(125, 194, 138, 0.25);
+}
+
+.alert.danger {
+  background: rgba(255, 214, 214, 0.55);
+  color: #7b1b1b;
+  border: 1px solid #e38b8b;
+  box-shadow: 0 4px 12px rgba(227, 105, 105, 0.2);
+}
+
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 
 .form-group {
   margin-bottom: 18px;
-  max-width: 325px;
 }
 
 .form-group input {
-  width: 100%;
-  padding: 13px 15px;
+  padding: 13px 6px;
   border-radius: 10px;
   border: 1px solid #d9b78e;
   font-size: 15px;
@@ -74,8 +124,8 @@ body {
   box-shadow: 0 0 8px rgba(163, 72, 90, 0.3);
 }
 
+
 .btn-submit {
-  width: 100%;
   padding: 13px;
   background-color: #a3485a;
   color: white;
@@ -85,36 +135,16 @@ body {
   font-size: 16px;
   font-weight: 600;
   letter-spacing: 0.5px;
+  transition: 0.25s ease;
+  width: 365px;
+  max-width: 400px;
 }
-
 
 .btn-submit:hover {
   background-color: #701c2a;
 }
 
-/* Alerts */
-.alert {
-  padding: 13px 16px;
-  border-radius: 12px;
-  margin-bottom: 18px;
-  font-size: 15px;
-  text-align: center;
-  font-weight: 500;
-}
 
-.alert.success {
-  background-color: rgba(255, 228, 196, 0.4);
-  color: #4b2a16;
-  border: 1px solid #e5b17f;
-}
-
-.alert.danger {
-  background-color: rgba(138, 0, 0, 0.15);
-  color: #5a0f1a;
-  border: 1px solid #e09c9c;
-}
-
-/* RIGHT */
 .login-right {
   flex: 1.2;
   background: url('images/perfumeSignUp.webp') center center / cover no-repeat;
@@ -129,4 +159,44 @@ body {
   position: absolute;
   inset: 0;
   background: rgba(90, 15, 26, 0.4);
+}
+
+.login-right-overlay {
+  position: relative;
+  background: rgba(255, 250, 243, 0.6);
+  padding: 50px 40px;
+  border-radius: 20px;
+  text-align: center;
+  color: #5a0f1a;
+  width: 75%;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+.login-right-overlay h4 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.login-right-overlay p {
+  font-size: 15px;
+  margin-bottom: 22px;
+  color: #7a3b46;
+  line-height: 1.5;
+}
+
+.signup-btn {
+  display: inline-block;
+  padding: 13px 40px;
+  background-color: #a3485a;
+  color: white;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.3s ease;
+  font-size: 15px;
+}
+
+.signup-btn:hover {
+  background-color: #701c2a;
 }
