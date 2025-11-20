@@ -100,7 +100,7 @@ if (isset($_GET['bid'])){
               Completed Orders Today: <?= $completedOrders ?><!-- Walk ins -->
             </p>
             <p class="card-text">
-              Revenue This Month: $<?= number_format($monthRevenue, 2) ?>
+              Revenue This Month (Walk-ins): $<?= number_format($monthRevenue, 2) ?>
             </p>
             <p class="card-text">
               Top selling: <?= $top3 ?> <!-- Walk ins -->

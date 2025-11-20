@@ -19,7 +19,7 @@ if(isset($_GET['filter'])) {
 $receivedPayments = $conn->query("SELECT p.amount, o.currency, c.fromUSD FROM payments p
                                       JOIN orders o ON o.order_ID = p.order_ID
                                       JOIN currencies c ON c.currency = o.currency
-                                      WHERE p.status = 'Received'");
+                                      WHERE p.status = 'Received' AND o.order_type = 'Online'");
 $total = 0;
 while ($row = $receivedPayments->fetch_assoc()) {
   $usd = $row['amount'] / $row['fromUSD'];
@@ -94,7 +94,7 @@ while ($row = $receivedPayments->fetch_assoc()) {
           </a>
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="ibm_online_payments.php">All</a></li>
-            <li><a class="dropdown-item" href="?filter=Processing">Preparing</a></li>
+            <li><a class="dropdown-item" href="?filter=Processing">Processing</a></li>
             <li><a class="dropdown-item" href="?filter=Received">Received</a></li>
             <li><a class="dropdown-item" href="?filter=Refunded">Refunded</a></li>
           </ul>
