@@ -381,7 +381,7 @@ if ($sort !== "name_asc") $activeFilters[] = "Sort: <strong>{$sortLabels[$sort]}
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// qty buttons and total
+// qty buttons & total
 document.querySelectorAll('.product-card').forEach(card => {
     const qtyInput = card.querySelector('.qty-input');
     const hiddenQty = card.querySelector('.qty-input-hidden');
@@ -394,7 +394,7 @@ document.querySelectorAll('.product-card').forEach(card => {
     const unitPriceUSD = parseFloat(priceEl.dataset.usd);
     const currencyRate = parseFloat(priceEl.dataset.rate);
     const currencySign = priceEl.dataset.sign;
-    const maxStock = Math.min(parseInt(priceEl.dataset.stock), 9999);
+    const maxStock = Math.min(parseInt(priceEl.dataset.stock), 9999)
 
     qtyInput.max = maxStock;
 
@@ -410,12 +410,14 @@ document.querySelectorAll('.product-card').forEach(card => {
         plusBtn.disabled = qty >= maxStock;
     };
 
-    minusBtn.addEventListener('click', () => {
+    minusBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
         qtyInput.value = Math.max(1, parseInt(qtyInput.value) - 1);
         updateQty();
     });
 
-    plusBtn.addEventListener('click', () => {
+    plusBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
         qtyInput.value = Math.min(maxStock, parseInt(qtyInput.value) + 1);
         updateQty();
     });
@@ -427,7 +429,10 @@ document.querySelectorAll('.product-card').forEach(card => {
 
 // add to cart
 document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
         const form = btn.closest('.add-to-cart-form');
         const perfumeVolID = form.querySelector('[name="perfume_volume_ID"]').value;
         const quantity = parseInt(form.querySelector('[name="quantity"]').value);
@@ -469,6 +474,3 @@ document.querySelectorAll('.qty-input').forEach(input => {
 </script>
 </body>
 </html>
-
-
-
