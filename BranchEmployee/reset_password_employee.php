@@ -2,39 +2,59 @@
 include('../db_connect.php');
 session_start();
 
-// Check if employee
+// allow only if branch employee
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Branch Employee') {
     header("Location: ../login_staff-admin.php");
     exit;
 }
 
-$manager_id = $_SESSION['user_id'];
-$manager_username = $_SESSION['username'];
+$employee_id = $_SESSION['user_id'];
+$employee_username = $_SESSION['username'];
+
+// branch address
+$branch_address = "";
+$stmtBranch = $conn->prepare("SELECT address FROM branches WHERE branch_ID = ?");
+$stmtBranch->bind_param("s", $_SESSION['branch_id']);
+$stmtBranch->execute();
+$resultBranch = $stmtBranch->get_result();
+if ($resultBranch && $row = $resultBranch->fetch_assoc()) {
+    $branch_address = $row['address'];
+}
+$stmtBranch->close();
 
 $message = "";
 $message_type = "";
 
-// Password reset
+// reset password
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reset_password'])) {
     $new_password = $_POST['new_password'];
     $confirm_password = $_POST['confirm_password'];
 
-    if ($new_password !== $confirm_password) {
+    if (strlen($new_password) < 8) {
+        $message = "Password must be at least 8 characters long.";
+        $message_type = "danger";
+    } elseif ($new_password !== $confirm_password) {
         $message = "Passwords do not match.";
         $message_type = "danger";
     } else {
         $hashedPassword = hash('sha256', $new_password);
-        $stmtUpdate = $conn->prepare("UPDATE staff SET password = ? WHERE staff_ID = ?");
-        $stmtUpdate->bind_param("ss", $hashedPassword, $manager_id);
 
-        if ($stmtUpdate->execute()) {
-            $message = "Your password has been successfully updated.";
-            $message_type = "success";
+        // reset password procedure from sql
+        $stmt = $conn->prepare("CALL reset_manager_password(?, ?, @message, @success)");
+        $stmt->bind_param("ss", $employee_id, $hashedPassword);
+        $stmt->execute();
+        $stmt->close();
+
+        // output
+        $result = $conn->query("SELECT @message AS message, @success AS success");
+        if ($result) {
+            $row = $result->fetch_assoc();
+            $message = $row['message'];
+            $message_type = $row['success'] == 1 ? "success" : "danger";
         } else {
-            $message = "Error updating password. Please try again.";
+            $message = "An error occurred while resetting password.";
             $message_type = "danger";
         }
-        $stmtUpdate->close();
     }
 }
 ?>
@@ -60,6 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reset_password'])) {
         overflow: hidden;
     }
 
+    /* Side bar */
     .sidebar {
         width: 250px;
         display: flex;
@@ -100,6 +121,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reset_password'])) {
         background: #842A3B;
     }
 
+    /* Main info */
     .main {
         flex: 1;
         overflow-y: auto;
@@ -113,12 +135,58 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reset_password'])) {
         margin-bottom: 30px;
     }
 
-    .manager-name {
+    .employee-name {
         font-size: 20px;
         color: #662422;
     }
 
-    h2, h3 {
+    /* profile */
+    .profile-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .profile-icon img {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+
+    .dropdown {
+        display: none;
+        position: absolute;
+        right: 0;
+        background: white;
+        min-width: 220px;
+        border: 1px solid #c7a786;
+        border-radius: 8px;
+        padding: 10px;
+        z-index: 100;
+    }
+
+    .dropdown p {
+        margin: 5px 0;
+    }
+
+    .logout-btn {
+        display: block;
+        background: #842A3B;
+        color: white;
+        text-align: center;
+        padding: 6px;
+        border-radius: 6px;
+        margin-top: 8px;
+        text-decoration: none;
+    }
+
+    .logout-btn:hover {
+        background: #662422;
+    }
+
+    /* form and alerts */
+    h2,
+    h3 {
         color: #662422;
         margin-bottom: 15px;
     }
@@ -165,6 +233,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reset_password'])) {
         background: #662422;
     }
 </style>
+
 </head>
 <body>
     <div class="sidebar">
@@ -183,7 +252,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reset_password'])) {
 
     <div class="main">
         <div class="topbar">
-            <div class="manager-name">Welcome, <?= htmlspecialchars($manager_username) ?></div>
+            <div class="employee-name">Welcome, <?= htmlspecialchars($employee_username) ?></div>
+            <div class="profile-container">
+                <div class="profile-icon" onclick="toggleDropdown()">
+                    <img src="profileIcon.png" alt="Profile">
+                </div>
+                <div id="profile-dropdown" class="dropdown">
+                    <p><strong>Username:</strong> <?= htmlspecialchars($employee_username) ?></p>
+                    <p><strong>Role:</strong> <?= htmlspecialchars($_SESSION['role']) ?></p>
+                    <p><strong>Branch:</strong> <?= htmlspecialchars($branch_address) ?></p>
+                    <a href="logout.php" class="logout-btn">Logout</a>
+                </div>
+            </div>
         </div>
 
         <h2>Reset Your Password</h2>
@@ -193,19 +273,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['reset_password'])) {
             <?php if($message): ?>
                 <div class="alert <?= $message_type ?>"><?= $message ?></div>
             <?php endif; ?>
-            <form method="POST" onsubmit="return confirmReset();">
+            <form method="POST" onsubmit="return validatePassword();">
                 <input type="hidden" name="reset_password" value="1">
                 <label>New Password:</label>
-                <input type="password" name="new_password" required placeholder="Enter new password">
+                <input type="password" name="new_password" id="new_password" required placeholder="Enter new password">
                 <label>Confirm Password:</label>
-                <input type="password" name="confirm_password" required placeholder="Confirm new password">
+                <input type="password" name="confirm_password" id="confirm_password" required placeholder="Confirm new password">
                 <button type="submit">Update Password</button>
             </form>
         </div>
     </div>
 
     <script>
-        function confirmReset() {
+        function toggleDropdown() {
+            const dropdown = document.getElementById("profile-dropdown");
+            dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+        }
+
+        window.onclick = function(event) {
+            if (!event.target.matches('.profile-icon img')) {
+                const dropdown = document.getElementById("profile-dropdown");
+                if(dropdown.style.display === "block") dropdown.style.display = "none";
+            }
+        }
+
+        function validatePassword() {
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+
+            if (newPassword.length < 8) {
+                alert("Password must be at least 8 characters long.");
+                return false;
+            }
+            if (newPassword !== confirmPassword) {
+                alert("Passwords do not match.");
+                return false;
+            }
+
             return confirm("Are you sure you want to change your password?");
         }
     </script>
