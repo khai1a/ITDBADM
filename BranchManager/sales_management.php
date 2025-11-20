@@ -37,7 +37,7 @@ if (!empty($_GET['from']) && !empty($_GET['to'])) {
     $toDate = $_GET['to'];
 }
 
-// get branch currecny
+// get branch currency
 $stmtCurrency = $conn->prepare("CALL get_branch_currency(?)");
 $stmtCurrency->bind_param("s", $branchID);
 $stmtCurrency->execute();
@@ -130,6 +130,19 @@ $stmtOSA->close();
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
+    :root {
+        --bg-main: #fffaf3;
+        --bg-accent: #f9e2cf;
+        --primary: #a3495a;
+        --primary-dark: #842A3B;
+        --primary-deep: #662422;
+        --border-soft: #d9b78e;
+        --text-main: #3b2320;
+        --success: #d4edda;
+        --warning: #fff3cd;
+        --danger: #f8d7da;
+    }
+
     * {
         box-sizing: border-box;
         font-family: 'Poppins', sans-serif;
@@ -141,8 +154,9 @@ $stmtOSA->close();
         display: flex;
         width: 100vw;
         height: 100vh;
-        background: #fffaf3;
+        background: radial-gradient(circle at top left, #fbe5d2, var(--bg-main));
         overflow: hidden;
+        color: var(--text-main);
     }
 
     .sidebar {
@@ -150,10 +164,12 @@ $stmtOSA->close();
         display: flex;
         flex-direction: column;
         flex-shrink: 0;
+        box-shadow: 4px 0 16px rgba(0,0,0,0.08);
+        z-index: 2;
     }
 
     .sidebar-top {
-        background: #a3495a;
+        background: linear-gradient(135deg, var(--primary), var(--primary-deep));
         padding: 30px 20px;
         height: 20%;
         display: flex;
@@ -164,43 +180,52 @@ $stmtOSA->close();
     .sidebar-top h1 {
         color: white;
         font-size: 22px;
+        letter-spacing: 1px;
     }
 
     .sidebar-bottom {
-        background: #662422;
+        background: var(--primary-deep);
         height: 80%;
-        padding: 20px;
+        padding: 20px 16px;
     }
 
     .sidebar-bottom a {
         display: block;
         color: white;
         text-decoration: none;
-        margin: 12px 0;
-        padding: 10px 15px;
-        border-radius: 8px;
+        margin: 8px 0;
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-size: 14px;
+        transition: background 0.15s, transform 0.1s;
     }
 
     .sidebar-bottom a:hover {
-        background: #842A3B;
+        background: var(--primary-dark);
+        transform: translateX(3px);
     }
 
     .main {
         flex: 1;
         overflow-y: auto;
-        padding: 40px;
+        padding: 30px 40px;
+        max-width: 1200px;
+        margin: 0 auto;
     }
 
     .topbar {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 30px;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(102, 36, 34, 0.15);
     }
 
     .manager-name {
         font-size: 20px;
-        color: #662422;
+        color: var(--primary-deep);
+        font-weight: 600;
     }
 
     .profile-container {
@@ -209,10 +234,12 @@ $stmtOSA->close();
     }
 
     .profile-icon img {
-        width: 35px;
-        height: 35px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         cursor: pointer;
+        border: 2px solid var(--primary);
+        object-fit: cover;
     }
 
     .dropdown {
@@ -220,231 +247,33 @@ $stmtOSA->close();
         position: absolute;
         right: 0;
         background: white;
-        min-width: 200px;
-        border: 1px solid #c7a786;
-        border-radius: 8px;
-        padding: 10px;
+        min-width: 220px;
+        border: 1px solid #f0d1ac;
+        border-radius: 10px;
+        padding: 12px;
+        margin-top: 8px;
+        box-shadow: 0 10px 24px rgba(0,0,0,0.1);
         z-index: 100;
+        font-size: 13px;
     }
 
     .dropdown p {
-        margin: 5px 0;
+        margin: 4px 0;
     }
 
     .logout-btn {
         display: block;
-        background: #842A3B;
+        background: var(--primary-dark);
         color: white;
         text-align: center;
-        padding: 6px;
-        border-radius: 6px;
-        margin-top: 8px;
+        padding: 7px;
+        border-radius: 8px;
+        margin-top: 10px;
         text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
     }
 
     .logout-btn:hover {
-        background: #662422;
+        background: var(--primary-deep);
     }
-
-    .box {
-        background: white;
-        border: 1px solid #d9b78e;
-        padding: 15px;
-        border-radius: 12px;
-        max-width: 550px;
-        margin-bottom: 20px;
-    }
-
-    h2, h3 {
-        color: #662422;
-    }
-
-    table {
-        width: 100%;
-        margin-top: 20px;
-        border-collapse: collapse;
-    }
-
-    th {
-        background: #a3495a;
-        color: white;
-    }
-
-    td, th {
-        padding: 10px;
-        border: 1px solid #d9b78e;
-        text-align: center;
-    }
-
-    .completed {
-        background: #d4edda;
-    }
-
-    .pending {
-        background: #fff3cd;
-    }
-
-    .cancelled {
-        background: #f8d7da;
-        color: #a10000;
-    }
-
-    button {
-        background: #842A3B;
-        border: none;
-        color: white;
-        padding: 8px 12px;
-        border-radius: 6px;
-        cursor: pointer;
-    }
-
-    button:hover {
-        background: #662422;
-    }
-
-    input {
-        border: 1px solid #c7a786;
-        padding: 6px;
-        border-radius: 6px;
-    }
-</style>
-
-</head>
-<body>
-<div class="sidebar">
-    <div class="sidebar-top">
-        <h1>Aurum Scents</h1>
-    </div>
-    <div class="sidebar-bottom">
-        <a href="manager_dashboard.php">Dashboard</a>
-        <a href="manager_inventory.php">Inventory</a>
-        <a href="manager_orders.php">Walk-In Orders</a>
-        <a href="manager_returns.php">Returns</a>
-        <a href="manager_view_orders.php">View Orders</a>
-        <a href="sales_management.php">Sales Management</a>
-        <a href="staff_management.php">Staff Management</a>
-        <a href="reset_password_manager.php">Reset Password</a>
-    </div>
-</div>
-
-<div class="main">
-    <div class="topbar">
-        <div class="manager-name">Welcome, <?= htmlspecialchars($manager_username) ?></div>
-        <div class="profile-container">
-            <div class="profile-icon" onclick="toggleDropdown()">
-                <img src="../BranchEmployee/profileIcon.png" alt="Profile">
-            </div>
-            <div id="profile-dropdown" class="dropdown">
-                <p><strong>Username:</strong> <?= htmlspecialchars($_SESSION['username']) ?></p>
-                <p><strong>Role:</strong> <?= htmlspecialchars($_SESSION['role']) ?></p>
-                <p><strong>Branch:</strong> <?= htmlspecialchars($branchID) ?></p>
-                <a href="logout.php" class="logout-btn">Logout</a>
-            </div>
-        </div>
-    </div>
-
-    <h2>Sales Management — Branch <?= htmlspecialchars($branchID) ?></h2>
-
-    <!-- FILTER -->
-    <div class="box">
-        <form method="GET">
-            <label>From:</label>
-            <input type="date" name="from" value="<?= htmlspecialchars($fromDate) ?>">
-            <label>To:</label>
-            <input type="date" name="to" value="<?= htmlspecialchars($toDate) ?>">
-            <button type="submit">Apply</button>
-            <a href="sales_management.php"><button type="button">Clear</button></a>
-        </form>
-        <br><b>Quick Filters:</b><br><br>
-        <a href="?filter=today"><button type="button">Today</button></a>
-        <a href="?filter=week"><button type="button">This Week</button></a>
-        <a href="?filter=month"><button type="button">This Month</button></a>
-    </div>
-
-    <!-- WALK-IN CHART -->
-    <h3>Daily Walk-in Sales Overview</h3>
-    <div style="width:90%; max-width:1000px;">
-        <canvas id="salesChart"></canvas>
-    </div>
-    <p><strong>Total Sales: <?= htmlspecialchars($branchCurrency) ?><?= number_format($totalSalesPeriod, 2) ?></strong></p>
-
-    <script>
-    const labels = <?= json_encode($salesLabels) ?>;
-    const data = <?= json_encode($salesTotals) ?>;
-
-    new Chart(document.getElementById('salesChart'), {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Daily Walk-in Sales (<?= $branchCurrency ?>)',
-                data: data,
-                borderColor: '#a3495a',
-                backgroundColor: 'rgba(163,73,90,0.25)',
-                borderWidth: 3,
-                tension: 0.3,
-                fill: true
-            }]
-        },
-        options: { responsive: true }
-    });
-
-    function toggleDropdown() {
-        const dropdown = document.getElementById("profile-dropdown");
-        dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-    }
-    </script>
-
-    <!-- WALK-IN ORDERS TABLE -->
-    <br><h3>Walk-in Orders</h3>
-    <table>
-        <tr>
-            <th>Order ID</th><th>Total</th><th>Date</th><th>Status</th>
-        </tr>
-        <?php while ($row = $walkinOrders->fetch_assoc()): ?>
-        <tr class="completed">
-            <td><?= htmlspecialchars($row['order_ID']) ?></td>
-            <td><?= htmlspecialchars($row['currency_sign']) ?><?= number_format($row['order_total'], 2) ?></td>
-            <td><?= htmlspecialchars($row['order_date']) ?></td>
-            <td>Completed</td>
-        </tr>
-        <?php endwhile; ?>
-    </table>
-
-    <!-- ONLINE ORDERS TABLE -->
-    <br><h3>Online Orders</h3>
-    <table>
-        <tr>
-            <th>Order ID</th><th>Total</th><th>Date</th><th>Status</th>
-        </tr>
-        <?php while ($row = $onlineOrders->fetch_assoc()): ?>
-        <tr class="<?= ($row['order_status']==='Completed') ? 'completed' : (($row['order_status']==='Cancelled') ? 'cancelled' : 'pending') ?>">
-            <td><?= htmlspecialchars($row['order_ID']) ?></td>
-            <td><?= htmlspecialchars($row['currency_sign'] ?: '₱') ?><?= number_format($row['order_total'], 2) ?></td>
-            <td><?= htmlspecialchars($row['order_date']) ?></td>
-            <td><?= htmlspecialchars($row['order_status']) ?></td>
-        </tr>
-        <?php endwhile; ?>
-    </table>
-
-    <!-- OSA TABLE -->
-    <br><h3>Order Supply Assignments (OSA)</h3>
-    <table>
-        <tr>
-            <th>OSA ID</th><th>Order ID</th><th>Perfume ID</th><th>Perfume Name</th><th>Volume (ml)</th><th>Qty Assigned</th><th>Unit Price</th>
-        </tr>
-        <?php while ($row = $osaResult->fetch_assoc()): ?>
-        <tr>
-            <td><?= htmlspecialchars($row['order_supply_assignment_ID']) ?></td>
-            <td><?= htmlspecialchars($row['order_ID']) ?></td>
-            <td><?= htmlspecialchars($row['perfume_ID']) ?></td>
-            <td><?= htmlspecialchars($row['perfume_name']) ?></td>
-            <td><?= htmlspecialchars($row['volume']) ?></td>
-            <td><?= htmlspecialchars($row['quantity']) ?></td>
-            <td><?= htmlspecialchars($row['currency_sign']) ?><?= number_format($row['unit_price'], 2) ?></td>
-        </tr>
-        <?php endwhile; ?>
-    </table>
-</div>
-</body>
-</html>

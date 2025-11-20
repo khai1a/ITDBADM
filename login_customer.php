@@ -1,5 +1,6 @@
 <?php
 include('db_connect.php');
+
 session_start();
 
 $message = "";
@@ -30,7 +31,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $message = "Customer not found.";
         $message_type = "danger";
     }
-}
+} 
+
 ?>
 
 <!DOCTYPE html>

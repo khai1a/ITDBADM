@@ -29,6 +29,11 @@
               Payments
             </a>
           </li>
+           <li class="nav-item">
+            <a class="nav-link" href="ibm_sales_management.php">
+              Sales Management
+            </a>
+          </li>
           <li class="nav-item">
             <a class="nav-link" href="logout.php">
               Logout
