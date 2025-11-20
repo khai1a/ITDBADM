@@ -112,7 +112,7 @@ $soldOut = ($totalStock == 0);
 <meta charset="UTF-8">
 <title><?= htmlspecialchars($perfume['perfume_name']) ?> - Aurum Scents</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="css/perfume_details.css">
+<link rel="stylesheet" href="perfume_details.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
@@ -234,5 +234,6 @@ document.getElementById('addToCartBtn')?.addEventListener('click', () => {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
 
 
