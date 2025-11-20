@@ -33,19 +33,14 @@ if ($branch_id) {
   
 }
 
-// capture filter from GET
 $filter = isset($_GET['filter']) ? $_GET['filter'] : 'all';
 
-// POST: handles quantity update
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['inventory_id'], $_POST['quantity'])) {
   $id  = $_POST['inventory_id'];
   $qty = (int)$_POST['quantity'];
 
   try {
-      // start transaction
       $conn->begin_transaction();
-
-      // lock row to prevent concurrent checkout updates
       $stmt = $conn->prepare("SELECT quantity FROM inventory WHERE inventory_ID=? FOR UPDATE");
       $stmt->bind_param("s", $id);
       $stmt->execute();
@@ -69,7 +64,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['inventory_id'], $_POS
   }
 }
 
-// build inventory query with filter
 $sql = "SELECT i.inventory_ID, p.perfume_name, pv.volume, i.quantity
         FROM inventory i
         JOIN perfume_volume pv ON i.perfume_volume_ID = pv.perfume_volume_ID
@@ -118,7 +112,6 @@ if ($stmt = $conn->prepare($sql)) {
     <a href="manager_view_orders.php">View Orders</a>
     <a href="sales_management.php">Sales Management</a> 
     <a href="staff_management.php">Staff Management</a>
-    <a href="reset_password_manager.php">Reset Password</a>
   </div>
 </div>
 
@@ -148,6 +141,7 @@ if ($stmt = $conn->prepare($sql)) {
       </select>
     </form>
     <input type="text" placeholder="Search perfume..." class="search-bar">
+    <a href="manager_addinventory.php" class="add-btn">+ Add Inventory</a>
   </div>
 
   <?php if (!empty($update_message)): ?>
@@ -218,3 +212,4 @@ function toggleDropdown() {
 </script>
 </body>
 </html>
+
