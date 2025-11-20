@@ -25,6 +25,11 @@
             </a>
           </li>
           <li class="nav-item">
+            <a class="nav-link" href="ibm_online_payments.php">
+              Payments
+            </a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link" href="logout.php">
               Logout
             </a>
