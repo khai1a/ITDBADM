@@ -5,12 +5,12 @@ session_start();
 $message = "";
 $message_type = "";
 
-// Login checking
+// check login
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = mysqli_real_escape_string($conn, $_POST['username']);
     $password = $_POST['password'];
 
-    // Check staff from sql
+    // Check staff table
     $query_staff = "SELECT * FROM staff WHERE username='$username'";
     $result_staff = mysqli_query($conn, $query_staff);
 
@@ -86,7 +86,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <div class="container">
   <div class="login-card">
 
-    <!-- LEFT -->
+    <!-- left part -->
     <div class="login-left">
       <h3>Admin/Staff Login</h3>
 
@@ -105,14 +105,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       </form>
     </div>
 
-    <!-- RIGHT -->
+    <!-- right part -->
     <div class="login-right"></div>
 
   </div>
 </div>
 </body>
 </html>
-
 
 
 
