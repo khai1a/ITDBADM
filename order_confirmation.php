@@ -242,7 +242,7 @@ $res->close();
 <meta charset="UTF-8">
 <title>Order Confirmation - Aurum Scents</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="css/order_confirmation.css">
+<link rel="stylesheet" href="order_confirmation.css">
 </head>
 <body>
 
@@ -292,4 +292,5 @@ $res->close();
 </section>
 </body>
 </html>
+
 
