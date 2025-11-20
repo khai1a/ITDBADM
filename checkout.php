@@ -263,7 +263,7 @@ $pointsConvertedDisplay = $pointsUSD * $currencyRate;
 <meta charset="utf-8" />
 <title>Checkout - Aurum Scents</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="css/checkout.css">
+<link rel="stylesheet" href="checkout.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 </head>
@@ -547,3 +547,4 @@ window.addEventListener('unload', function () {
 </script>
 </body>
 </html>
+
