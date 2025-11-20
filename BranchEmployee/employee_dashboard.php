@@ -87,20 +87,26 @@ $stmt->execute();
 $resOrders = $stmt->get_result()->fetch_assoc();
 $stmt->close();
 
-// returns pending
-$sqlReturns = "
-    SELECT COUNT(*) AS pending_returns
-    FROM returns r
-    JOIN order_details od ON r.order_detail_ID = od.order_detail_ID
-    JOIN orders o ON od.order_ID = o.order_ID
+// promo usage
+$sqlPromoUsage = "
+    SELECT d.discount_code, d.discount_percent, COUNT(*) AS usage_count
+    FROM orders o
+    JOIN discounts d ON o.discount_code = d.discount_code
     WHERE o.branch_ID = ?
-      AND r.status = 'Requested'
+      AND o.order_type = 'Walk-in'
+      AND o.order_status = 'Completed'
+      AND o.discount_code IS NOT NULL
+    GROUP BY d.discount_code
+    ORDER BY usage_count DESC
+    LIMIT 1
 ";
-$stmt = $conn->prepare($sqlReturns);
+
+$stmt = $conn->prepare($sqlPromoUsage);
 $stmt->bind_param("s", $branch_id);
 $stmt->execute();
-$resReturns = $stmt->get_result()->fetch_assoc();
+$resPromoUsage = $stmt->get_result()->fetch_assoc();
 $stmt->close();
+
 
 
 // ongoing promo
@@ -176,8 +182,15 @@ $stmt->close();
   </div>
 
   <div class="card">
-    <h3>Returns</h3>
-    <p><?= $resReturns['pending_returns'] ?> pending requests</p>
+  <h3>Most Used Promo</h3>
+<?php if ($resPromoUsage): ?>
+  <p>Code: <?= htmlspecialchars($resPromoUsage['discount_code']) ?></p>
+  <p><?= $resPromoUsage['discount_percent'] * 100 ?>% off</p>
+  <p><?= $resPromoUsage['usage_count'] ?> uses</p>
+<?php else: ?>
+  <p>No promo usage</p>
+<?php endif; ?>
+
   </div>
 
   <div class="card">
