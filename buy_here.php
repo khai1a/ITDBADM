@@ -314,7 +314,6 @@ if ($sort !== "name_asc") $activeFilters[] = "Sort: <strong>{$sortLabels[$sort]}
             ?>
             <div class="col-md-4">
                 <div class="product-card p-3 position-relative">
-                    <input type="checkbox" class="checkout_selected mb-2" value="<?= htmlspecialchars($prod['perfume_volume_ID']) ?>">
                     <a href="perfume_details.php?perfume_volume_ID=<?= htmlspecialchars($prod['perfume_volume_ID']) ?>" class="text-decoration-none text-dark">
                         <img src="images/<?= htmlspecialchars($prod['image_name']) ?>" class="card-img-top" alt="<?= htmlspecialchars($prod['perfume_name']) ?>">
                         <h5 class="mt-2"><?= htmlspecialchars($prod['perfume_name']) ?></h5>
@@ -474,3 +473,4 @@ document.querySelectorAll('.qty-input').forEach(input => {
 </script>
 </body>
 </html>
+
