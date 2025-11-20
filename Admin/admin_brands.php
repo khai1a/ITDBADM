@@ -90,6 +90,7 @@ if (isset($_GET['edit_brand'])) {
                     <?= $editBrand ? 'Update Brand' : 'Add Brand' ?>
                 </button>
                 <?php if ($editBrand): ?>
+                    <input type="hidden" name="brand_ID" value="<?= $editBrand['brand_ID'] ?>">
                     <a href="admin_brands.php" class="btn btn-secondary ml-2">Cancel</a>
                 <?php endif; ?>
             </form>
@@ -116,7 +117,7 @@ if (isset($_GET['edit_brand'])) {
                             <a href="?edit_brand=<?= $row['brand_ID'] ?>" class="btn btn-sm btn-info">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <a href="?delete_brand=<?= $row['brand_ID'] ?>"
+                            <a href="process_brand.php?delete_brand=<?= $row['brand_ID'] ?>"
                                class="btn btn-sm btn-danger"
                                onclick="return confirm('Delete brand <?= $row['brand_name'] ?>?');">
                                <i class="fa-solid fa-trash-can"></i>

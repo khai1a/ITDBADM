@@ -7,18 +7,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $conn->query("SET @id = ''");
     $conn->query("CALL getLastBrandID(@id)");
 
-    $brand_ID = $conn->query("SELECT @id")->fetch_assoc()['@id'];
+    
     $brand_name = trim($_POST['brand_name']);
     $brand_type = $_POST['brand_type'];
     $action = $_POST['action'] ?? 'create';
 
     if ($action === 'create') {
+        $brand_ID = $conn->query("SELECT @id")->fetch_assoc()['@id'];
         $sql = "INSERT INTO brands (brand_ID, brand_name, brand_type)
                 VALUES (?, ?, ?)";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("sss", $brand_ID, $brand_name, $brand_type);
     } elseif ($action === 'update') {
-     
+        $brand_ID = $_POST['brand_ID'];
         $sql = "UPDATE brands
                 SET brand_name = ?, brand_type = ?
                 WHERE brand_ID = ?";
