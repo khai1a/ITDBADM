@@ -5,30 +5,29 @@ session_start();
 $message = "";
 $success = false;
 
-// countries dropdown from sql
+// Get countries for the dropdown
 $country_result = mysqli_query($conn, "SELECT country_ID, country_name, currency FROM countries ORDER BY country_name ASC");
-
 
 $signup_data = $_SESSION['signup'] ?? [];
 
-// Email validation
+// check email
 function validate_strict_email($email) {
     return preg_match('/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,10}$/', $email);
 }
 
-// Password validation
+// check password
 function validate_password($password) {
     return preg_match('/^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[\W_]).{8,}$/', $password);
 }
 
-// Phone number validation (caters to many countries numbers)
+// validate mobile numbers
 function validate_phone($phone) {
     return preg_match('/^\+\d{6,15}$/', $phone);
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-
+// save personal data
     if (isset($_POST['step']) && $_POST['step'] == 1) {
         $password = $_POST['password'];
         $confirm_password = $_POST['confirm_password'];
@@ -57,7 +56,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
- 
     if (isset($_POST['step']) && $_POST['step'] == 2) {
 
         $data = $_SESSION['signup'];
@@ -75,13 +73,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $province = mysqli_real_escape_string($conn, $_POST['province']);
         $postal_code = mysqli_real_escape_string($conn, $_POST['postal_code']);
 
-        // Check duplicates
+        // Check if number or email is repeated
         $check = mysqli_query($conn, "SELECT * FROM customers WHERE email='$email' OR mobile_number='$mobile'");
         if (mysqli_num_rows($check) > 0) {
             $message = "Email or mobile number already exists!";
         } else {
 
-            
+            // customer id generation
             $res = mysqli_query($conn, "SELECT customer_ID
                             FROM customers
                             ORDER BY CAST(SUBSTRING(customer_ID,3) AS UNSIGNED) DESC
@@ -96,7 +94,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-            
+            // insert to customers
             $insert_customer = "INSERT INTO customers 
                 (customer_ID, first_name, last_name, email, password, mobile_number, country_ID, birthday) 
                 VALUES 
@@ -104,7 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             if (mysqli_query($conn, $insert_customer)) {
 
-               
+                // address id generation
                 $resAdd = mysqli_query($conn, "SELECT address_ID 
                                                FROM customer_addresses 
                                                ORDER BY CAST(SUBSTRING(address_ID,3) AS UNSIGNED) DESC 
@@ -117,7 +115,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $address_ID = 'AD0001';
                 }
 
-            
+                
                 $insert_address = "INSERT INTO customer_addresses 
                     (address_ID, customer_ID, address_line1, address_line2, city, province, postal_code, country_ID) 
                     VALUES 
@@ -147,7 +145,7 @@ $step = $_GET['step'] ?? 1;
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Register - Aurum Scents</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="css/sign-up_customer.css">
+<link rel="stylesheet" href="sign-up_customer.css">
 </head>
 <body>
 <div class="background-wrapper">
@@ -208,7 +206,7 @@ $step = $_GET['step'] ?? 1;
         <button type="submit" class="btn btn-login w-100" id="nextBtn" disabled>Next</button>
     </div>
     <?php else: ?>
-    <!-- Step 2 fields -->
+    <!-- Step 2 part of signup -->
     <input type="hidden" name="step" value="2">
     <div id="step2" class="step active">
         <h4>Address Information</h4>
@@ -251,7 +249,7 @@ $step = $_GET['step'] ?? 1;
 </div>
 
 <script>
-// Validation functions
+// validation function
 function validateEmail(email) {
     return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,10}$/.test(email);
 }
@@ -259,14 +257,14 @@ function validatePassword(p) {
     return /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[\W_]).{8,}$/.test(p);
 }
 function validatePhone(p) {
-    // Ensure it starts with + and 6-15 digits
+    // start the number with a plus (+) sign
     return /^\+\d{6,15}$/.test(p);
 }
 
 let touchedStep1 = {};
 let touchedStep2 = {};
 
-// Error messages
+// error messages
 function getErrorMessage(f, value) {
     if(value.trim() === '') return 'Please fill out this field';
     if(f === 'email' && !validateEmail(value)) return 'Invalid email format (example: name@example.com)';
@@ -276,6 +274,7 @@ function getErrorMessage(f, value) {
     return '';
 }
 
+// Step 1 
 function checkStep1() {
     let fields = ['first_name','last_name','email','password','confirm_password','mobile_number','birthday','country_ID'];
     let btn = document.getElementById('nextBtn');
@@ -286,7 +285,7 @@ function checkStep1() {
         let msg = getErrorMessage(f, el.value);
         let errorEl = document.getElementById(f+'_error');
 
-    
+        
         if(touchedStep1[f]) {
             if(msg) {
                 el.classList.add('invalid'); el.classList.remove('valid');
@@ -304,7 +303,7 @@ function checkStep1() {
     btn.disabled = !allValid;
 }
 
-
+// Step 2
 function checkStep2() {
     let fields = ['address_line1','city','postal_code'];
     let btn = document.getElementById('signupBtn');
@@ -337,7 +336,7 @@ document.querySelectorAll('#step1 input, #step1 select').forEach(el => {
     el.addEventListener('input', e => {
         touchedStep1[e.target.name] = true;
 
-    
+     
         if(e.target.name === 'mobile_number') {
             if(e.target.value && !e.target.value.startsWith('+')) {
                 e.target.value = '+' + e.target.value.replace(/^\+*/,'');
@@ -353,7 +352,6 @@ document.querySelectorAll('#step1 input, #step1 select').forEach(el => {
     });
 });
 
-
 document.querySelectorAll('#step2 input').forEach(el => {
     el.addEventListener('input', e => {
         touchedStep2[e.target.name] = true;
@@ -367,4 +365,3 @@ document.querySelectorAll('#step2 input').forEach(el => {
 </script>
 </body>
 </html>
-
