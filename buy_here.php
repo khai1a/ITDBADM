@@ -411,12 +411,12 @@ document.querySelectorAll('.product-card').forEach(card => {
     };
 
     minusBtn.addEventListener('click', () => {
-        qtyInput.stepDown();
+        qtyInput.value = Math.max(1, parseInt(qtyInput.value) - 1);
         updateQty();
     });
 
     plusBtn.addEventListener('click', () => {
-        qtyInput.stepUp();
+        qtyInput.value = Math.min(maxStock, parseInt(qtyInput.value) + 1);
         updateQty();
     });
 
@@ -469,5 +469,6 @@ document.querySelectorAll('.qty-input').forEach(input => {
 </script>
 </body>
 </html>
+
 
 
