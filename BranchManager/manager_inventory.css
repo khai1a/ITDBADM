@@ -100,5 +100,54 @@ h2 {
     transform: translateY(0);
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
   }
-  
+
+  .page-container { 
+    padding:20px; 
+  }
+  .card { 
+    background:white; 
+    padding:16px; 
+    border-radius:8px; 
+    box-shadow:0 4px 10px rgba(0,0,0,0.10); 
+    max-width:650px; 
+  }
+  .form-row { 
+    margin-bottom:16px; 
+    display:flex; 
+    flex-direction:column; 
+  }
+  select, input { 
+    padding:8px; 
+    border:1px solid #ccc; 
+    border-radius:6px; 
+  }
+  label { 
+    font-weight:600; 
+    margin-bottom:6px; 
+  }
+  .btn-primary { 
+    background:#842A3B; 
+    color:white; 
+    padding:10px 14px;
+     border:none; 
+     border-radius:6px; 
+     cursor:pointer; 
+    }
+  .btn-primary:hover { 
+    background:#6f2230; 
+  }
+  .alert { 
+    padding:10px; 
+    background:#eedcdc; 
+    border-left:4px solid #842A3B; 
+    margin-bottom:14px; 
+    border-radius:4px; }
+  .back-link { 
+    margin-left:10px; 
+    text-decoration:none; 
+    color:#333;
+   }
+  .back-link:hover { 
+    text-decoration:underline; 
+  }
   
