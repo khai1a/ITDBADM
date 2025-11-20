@@ -56,14 +56,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
 }
 
 // cart items
+// cart items
 $cartRes = $conn->prepare("
-    SELECT ci.cart_item_ID, pv.perfume_ID, pv.volume, pv.selling_price, p.perfume_name, ci.quantity,
-           COALESCE(i.quantity,0) AS total_stock
+    SELECT ci.cart_item_ID,
+           pv.perfume_ID,
+           pv.volume,
+           pv.selling_price,
+           p.perfume_name,
+           ci.quantity,
+           COALESCE(i.total_stock, 0) AS total_stock
     FROM cart_items ci
     JOIN perfume_volume pv ON ci.perfume_volume_ID = pv.perfume_volume_ID
     JOIN perfumes p ON pv.perfume_ID = p.perfume_ID
     JOIN cart c ON ci.cart_ID = c.cart_ID
-    LEFT JOIN inventory i ON pv.perfume_volume_ID = i.perfume_volume_ID
+    LEFT JOIN (
+        SELECT perfume_volume_ID, SUM(quantity) AS total_stock
+        FROM inventory
+        GROUP BY perfume_volume_ID
+    ) i ON pv.perfume_volume_ID = i.perfume_volume_ID
     WHERE c.customer_ID = ?
 ");
 $cartRes->bind_param("s", $customerID);
@@ -267,4 +277,5 @@ updateSubtotal();
 </script>
 </body>
 </html>
+
 
