@@ -112,7 +112,7 @@ $conn->close();
 <meta charset="UTF-8">
 <title>Edit Profile</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="css/edit_profile.css">
+<link rel="stylesheet" href="edit_profile.css">
 </head>
 <body>
 <div class="container">
@@ -223,4 +223,5 @@ checkChanges();
 </script>
 </body>
 </html>
+
 
